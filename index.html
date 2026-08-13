@@ -3,18 +3,59 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Energy Ball Survival</title>
+<title>ENERGY BALL // SYSTEM 86</title>
 
 <style>
+*{
+box-sizing:border-box;
+}
+
 html,body{
 margin:0;
 width:100%;
 height:100%;
 overflow:hidden;
-background:#111;
+background:#050805;
+color:#39ff14;
+font-family:"Courier New",monospace;
 user-select:none;
-font-family:Arial,sans-serif
+cursor:crosshair;
 }
+
+/* =========================================
+   RETRO CRT EFFECT
+========================================= */
+
+body::before{
+content:"";
+position:fixed;
+inset:0;
+pointer-events:none;
+z-index:9000;
+background:
+repeating-linear-gradient(
+to bottom,
+rgba(255,255,255,.025) 0px,
+rgba(255,255,255,.025) 1px,
+transparent 1px,
+transparent 4px
+);
+}
+
+body::after{
+content:"";
+position:fixed;
+inset:0;
+pointer-events:none;
+z-index:9001;
+box-shadow:
+inset 0 0 100px rgba(0,255,40,.12),
+inset 0 0 250px rgba(0,0,0,.7);
+}
+
+/* =========================================
+   BALL
+========================================= */
 
 #ball{
 position:absolute;
@@ -22,70 +63,92 @@ width:40px;
 height:40px;
 border-radius:50%;
 background:#a020f0;
-box-shadow:0 0 25px #a020f0,0 0 55px #7b00ff;
+box-shadow:
+0 0 15px #a020f0,
+0 0 35px #a020f0,
+0 0 70px #7b00ff;
 z-index:20;
 pointer-events:none;
-transition:filter .15s
 }
 
 #ball.powerFlash{
-animation:ballPowerFlash .6s ease-out
+animation:ballPowerFlash .6s ease-out;
 }
 
 @keyframes ballPowerFlash{
-0%{transform:scale(1);filter:brightness(1)}
-30%{transform:scale(1.65);filter:brightness(3)}
-100%{transform:scale(1);filter:brightness(1)}
+0%{
+transform:scale(1);
+filter:brightness(1);
 }
+30%{
+transform:scale(1.65);
+filter:brightness(3);
+}
+100%{
+transform:scale(1);
+filter:brightness(1);
+}
+}
+
+/* =========================================
+   BLOCKS
+========================================= */
 
 .block{
 position:absolute;
-background:#fff;
-box-shadow:0 0 12px rgba(255,255,255,.8);
+background:#39ff14;
+box-shadow:
+0 0 5px #39ff14,
+0 0 12px rgba(57,255,20,.5);
 z-index:5;
 pointer-events:none;
-border-radius:2px
+border:1px solid #9cff8c;
 }
 
 .block.damaged{
-background:#aaa;
-box-shadow:0 0 10px rgba(255,255,255,.35)
+background:#247c18;
 }
 
 #blockPreview{
 position:absolute;
-background:rgba(255,255,255,.3);
-border:2px dashed #fff;
-box-sizing:border-box;
+background:rgba(57,255,20,.15);
+border:2px dashed #39ff14;
 pointer-events:none;
 z-index:30;
-display:none
+display:none;
 }
+
+/* =========================================
+   ENEMIES
+========================================= */
 
 .enemy{
 position:absolute;
 width:18px;
 height:18px;
 border-radius:50%;
-background:#f22;
-box-shadow:0 0 8px #f00,0 0 20px #f00;
+background:#ff2222;
+box-shadow:
+0 0 8px #ff0000,
+0 0 20px #ff0000;
 z-index:12;
 pointer-events:none;
-animation:pulse .55s infinite alternate
+animation:pulse .55s infinite alternate;
 }
 
 .enemy.green{
 background:#28ff72;
-box-shadow:0 0 8px #00ff55,0 0 22px #00ff55;
+box-shadow:
+0 0 8px #00ff55,
+0 0 22px #00ff55;
 }
 
 .enemy.purple{
-background:#a020f0;
+background:#b000ff;
 box-shadow:
-0 0 10px #c000ff,
+0 0 10px #b000ff,
 0 0 25px #8b00ff,
 0 0 45px #ff00ff;
-animation:purplePulse .45s infinite alternate;
 }
 
 .enemy.boss{
@@ -93,7 +156,7 @@ width:55px;
 height:55px;
 background:#8b00ff;
 box-shadow:
-0 0 15px #f00,
+0 0 15px #ff0000,
 0 0 35px #9000ff,
 0 0 70px #ff0000;
 animation:bossPulse .45s infinite alternate;
@@ -106,8 +169,8 @@ background:#ff9d00;
 box-shadow:
 0 0 10px #ffb300,
 0 0 25px #ff5e00,
-0 0 45px #f00;
-animation:bombPulse .35s infinite alternate
+0 0 45px #ff0000;
+animation:bombPulse .35s infinite alternate;
 }
 
 .enemy.popupEnemy{
@@ -115,37 +178,25 @@ background:#00bfff;
 box-shadow:
 0 0 10px #00eaff,
 0 0 25px #008cff;
-animation:popupEnemyPulse .5s infinite alternate
-}
-
-.enemy.bomb.armed{
-animation:bombArmedPulse .25s infinite alternate;
-background:#ff2200;
-box-shadow:
-0 0 15px #ff0000,
-0 0 35px #ff5e00,
-0 0 65px #ff0000;
 }
 
 .enemy.burrowing{
 box-shadow:
 0 0 8px #ff0000,
 0 0 20px #ff0000,
-0 0 35px rgba(255,0,0,.8)
+0 0 35px rgba(255,0,0,.8);
 }
 
 .enemy.green.burrowing{
 box-shadow:
 0 0 8px #00ff55,
-0 0 25px #00ff55,
-0 0 40px rgba(0,255,80,.8)
+0 0 25px #00ff55;
 }
 
 .enemy.purple.burrowing{
 box-shadow:
-0 0 8px #d000ff,
-0 0 25px #9d00ff,
-0 0 40px rgba(200,0,255,.8)
+0 0 8px #b000ff,
+0 0 25px #b000ff;
 }
 
 .enemy::after{
@@ -154,30 +205,25 @@ position:absolute;
 inset:-5px;
 border:2px solid rgba(255,0,0,.25);
 border-radius:50%;
-animation:tunnelPulse .35s infinite alternate
+animation:tunnelPulse .35s infinite alternate;
 }
 
 .enemy.green::after{
-border-color:rgba(0,255,80,.35)
+border-color:rgba(0,255,80,.35);
 }
 
 .enemy.purple::after{
-border-color:rgba(210,0,255,.55)
+border-color:rgba(180,0,255,.5);
 }
 
 .enemy.bomb::after{
 border-color:rgba(255,180,0,.7);
-inset:-8px
-}
-
-.enemy.bomb.armed::after{
-border-color:rgba(255,0,0,.9);
-inset:-12px
+inset:-8px;
 }
 
 .enemy.popupEnemy::after{
 border-color:rgba(0,220,255,.65);
-inset:-7px
+inset:-7px;
 }
 
 .boss::after{
@@ -187,63 +233,131 @@ border-width:3px;
 }
 
 @keyframes pulse{
-from{transform:scale(.72);opacity:.65}
-to{transform:scale(1.3);opacity:1}
-}
-
-@keyframes purplePulse{
 from{
-transform:scale(.75);
-opacity:.7;
-filter:hue-rotate(0deg)
+transform:scale(.72);
+opacity:.65;
 }
 to{
 transform:scale(1.3);
 opacity:1;
-filter:hue-rotate(25deg)
 }
 }
 
 @keyframes bossPulse{
-from{transform:scale(.85);opacity:.8}
-to{transform:scale(1.12);opacity:1}
-}
-
-@keyframes tunnelPulse{
-from{transform:scale(.75);opacity:.2}
-to{transform:scale(1.3);opacity:.8}
-}
-
-@keyframes bombPulse{
-from{transform:scale(.7);filter:brightness(1)}
-to{transform:scale(1.25);filter:brightness(2)}
-}
-
-@keyframes bombArmedPulse{
 from{
 transform:scale(.85);
-filter:brightness(1);
+opacity:.8;
 }
 to{
-transform:scale(1.4);
-filter:brightness(3);
-}
-}
-
-@keyframes firePulse{
-from{
-transform:scale(.8);
-opacity:.65;
-}
-to{
-transform:scale(1.15);
+transform:scale(1.12);
 opacity:1;
 }
 }
 
-/* =========================
+@keyframes tunnelPulse{
+from{
+transform:scale(.75);
+opacity:.2;
+}
+to{
+transform:scale(1.3);
+opacity:.8;
+}
+}
+
+@keyframes bombPulse{
+from{
+transform:scale(.7);
+filter:brightness(1);
+}
+to{
+transform:scale(1.25);
+filter:brightness(2);
+}
+}
+
+/* =========================================
+   BOMB COUNTDOWN
+========================================= */
+
+#bombCountdown{
+position:fixed;
+left:50%;
+top:95px;
+transform:translateX(-50%);
+color:#ff8c00;
+font-size:28px;
+font-weight:bold;
+z-index:400;
+display:none;
+text-shadow:
+0 0 8px #ff5e00,
+0 0 20px #ff0000;
+animation:countdownPulse .5s infinite alternate;
+}
+
+#bombWarning{
+position:fixed;
+left:50%;
+top:132px;
+transform:translateX(-50%);
+color:#ff3300;
+font-size:14px;
+font-weight:bold;
+z-index:400;
+display:none;
+animation:warningFlash .3s infinite alternate;
+}
+
+@keyframes countdownPulse{
+from{
+transform:translateX(-50%) scale(.9);
+}
+to{
+transform:translateX(-50%) scale(1.12);
+}
+}
+
+@keyframes warningFlash{
+from{opacity:.3}
+to{opacity:1}
+}
+
+/* =========================================
+   BOMB FIRE
+========================================= */
+
+.bombFire{
+position:absolute;
+border-radius:50%;
+border:5px solid #ff6a00;
+box-shadow:
+0 0 20px #ff0000,
+0 0 50px #ff6a00,
+0 0 100px #ff0000;
+z-index:350;
+pointer-events:none;
+animation:bombExplosion .65s ease-out forwards;
+}
+
+@keyframes bombExplosion{
+0%{
+width:20px;
+height:20px;
+opacity:1;
+transform:translate(-50%,-50%) scale(.1);
+}
+100%{
+width:650px;
+height:650px;
+opacity:0;
+transform:translate(-50%,-50%) scale(1);
+}
+}
+
+/* =========================================
    BOSS
-========================= */
+========================================= */
 
 #bossBar{
 position:fixed;
@@ -252,20 +366,21 @@ top:15px;
 transform:translateX(-50%);
 width:500px;
 height:22px;
-background:#210021;
-border:2px solid #a000ff;
-border-radius:15px;
+background:#090009;
+border:2px solid #b000ff;
 z-index:250;
 display:none;
 overflow:hidden;
-box-shadow:0 0 20px #9000ff
+box-shadow:
+0 0 10px #8b00ff,
+0 0 25px #ff00ff;
 }
 
 #bossFill{
 height:100%;
 width:100%;
-background:linear-gradient(90deg,#ff0000,#b000ff);
-transition:width .15s
+background:#ff00ff;
+transition:width .15s;
 }
 
 #bossName{
@@ -273,32 +388,26 @@ position:fixed;
 left:50%;
 top:42px;
 transform:translateX(-50%);
-color:#fff;
+color:#ff00ff;
 font-size:15px;
 font-weight:bold;
 z-index:251;
 display:none;
-text-shadow:0 0 10px #f00
 }
 
-/* =========================
+/* =========================================
    SHIELD
-========================= */
+========================================= */
 
 #shield{
 position:absolute;
-width:58px;
-height:78px;
+width:70px;
+height:90px;
 display:none;
 z-index:21;
 pointer-events:none;
-box-sizing:border-box;
-background:linear-gradient(
-135deg,
-rgba(90,230,255,.95),
-rgba(0,100,255,.65)
-);
-border:4px solid #42ddff;
+background:rgba(0,180,255,.3);
+border:4px solid #36dcff;
 clip-path:polygon(
 50% 0%,
 92% 18%,
@@ -312,8 +421,7 @@ clip-path:polygon(
 filter:
 drop-shadow(0 0 5px #36dcff)
 drop-shadow(0 0 14px #008cff)
-drop-shadow(0 0 28px rgba(0,180,255,.8));
-transform-origin:center;
+drop-shadow(0 0 28px #00bfff);
 }
 
 #shield::before{
@@ -324,8 +432,8 @@ top:10%;
 width:4px;
 height:72%;
 transform:translateX(-50%);
-background:rgba(255,255,255,.75);
-box-shadow:0 0 8px white
+background:white;
+box-shadow:0 0 8px white;
 }
 
 #shield::after{
@@ -335,23 +443,13 @@ left:19%;
 top:45%;
 width:62%;
 height:4px;
-background:rgba(255,255,255,.65);
-box-shadow:0 0 8px white
+background:white;
+box-shadow:0 0 8px white;
 }
 
-#shield.powerupActive{
-animation:shieldPower .8s ease-out
-}
-
-@keyframes shieldPower{
-0%{filter:brightness(1)}
-25%{filter:brightness(3)}
-100%{filter:brightness(1)}
-}
-
-/* =========================
+/* =========================================
    LOOT
-========================= */
+========================================= */
 
 .loot{
 position:absolute;
@@ -360,37 +458,57 @@ height:30px;
 display:flex;
 justify-content:center;
 align-items:center;
-border-radius:8px;
-background:#17171d;
-border:2px solid #aaa;
+border-radius:4px;
+background:#071007;
+border:2px solid #39ff14;
 z-index:15;
 animation:lootFloat .7s infinite alternate;
 pointer-events:none;
-font-size:20px
-}
-
-.loot::after{
-content:"";
-position:absolute;
-inset:-5px;
-border-radius:12px;
-border:2px solid rgba(255,255,255,.25);
-animation:lootRing 1s infinite linear
+font-size:19px;
+box-shadow:0 0 10px rgba(57,255,20,.5);
 }
 
 @keyframes lootFloat{
-from{transform:translateY(-2px) scale(.95)}
-to{transform:translateY(4px) scale(1.08)}
+from{
+transform:translateY(-2px);
+}
+to{
+transform:translateY(4px);
+}
 }
 
-@keyframes lootRing{
-from{transform:scale(.7);opacity:.8}
-to{transform:scale(1.5);opacity:0}
+/* =========================================
+   SPEED DEMON EFFECT
+========================================= */
+
+.speedDemonLine{
+position:fixed;
+height:8px;
+background:#ffff00;
+box-shadow:
+0 0 8px #ffff00,
+0 0 25px #ff8800,
+0 0 50px #ff0000;
+transform-origin:left center;
+pointer-events:none;
+z-index:500;
+animation:speedDemonFade .5s forwards;
 }
 
-/* =========================
-   POWERUP ANIMATION
-========================= */
+@keyframes speedDemonFade{
+0%{
+opacity:1;
+height:14px;
+}
+100%{
+opacity:0;
+height:2px;
+}
+}
+
+/* =========================================
+   POWERUP
+========================================= */
 
 .powerupAnimation{
 position:fixed;
@@ -401,26 +519,9 @@ z-index:450;
 pointer-events:none;
 font-size:80px;
 animation:powerupPop 1.1s ease-out forwards;
-text-shadow:0 0 15px currentColor,0 0 45px currentColor
-}
-
-@keyframes powerupPop{
-0%{
-opacity:0;
-transform:translate(-50%,-50%) scale(.2) rotate(-30deg)
-}
-20%{
-opacity:1;
-transform:translate(-50%,-50%) scale(1.5) rotate(10deg)
-}
-55%{
-opacity:1;
-transform:translate(-50%,-50%) scale(1) rotate(0deg)
-}
-100%{
-opacity:0;
-transform:translate(-50%,-50%) scale(2.2) rotate(20deg)
-}
+text-shadow:
+0 0 15px currentColor,
+0 0 45px currentColor;
 }
 
 .powerupLabel{
@@ -430,100 +531,110 @@ top:58%;
 transform:translateX(-50%);
 z-index:451;
 pointer-events:none;
-color:#fff;
+color:#39ff14;
 font-size:22px;
 font-weight:bold;
-text-shadow:0 0 10px currentColor,0 0 25px currentColor;
-animation:powerupLabel 1.1s ease-out forwards
+animation:powerupLabel 1.1s ease-out forwards;
+}
+
+@keyframes powerupPop{
+0%{
+opacity:0;
+transform:translate(-50%,-50%) scale(.2);
+}
+20%{
+opacity:1;
+transform:translate(-50%,-50%) scale(1.5);
+}
+55%{
+opacity:1;
+transform:translate(-50%,-50%) scale(1);
+}
+100%{
+opacity:0;
+transform:translate(-50%,-50%) scale(2.2);
+}
 }
 
 @keyframes powerupLabel{
-0%{opacity:0;transform:translate(-50%,20px)}
-20%{opacity:1;transform:translate(-50%,0)}
-75%{opacity:1}
-100%{opacity:0;transform:translate(-50%,-25px)}
-}
-
-.powerRing{
-position:fixed;
-left:50%;
-top:50%;
-width:30px;
-height:30px;
-border:5px solid white;
-border-radius:50%;
-z-index:449;
-pointer-events:none;
-animation:powerRing 1s ease-out forwards
-}
-
-@keyframes powerRing{
-from{
-opacity:1;
-width:30px;
-height:30px;
-margin-left:-20px;
-margin-top:-20px
-}
-to{
+0%{
 opacity:0;
-width:700px;
-height:700px;
-margin-left:-355px;
-margin-top:-355px
+transform:translate(-50%,20px);
+}
+20%{
+opacity:1;
+transform:translate(-50%,0);
+}
+75%{
+opacity:1;
+}
+100%{
+opacity:0;
+transform:translate(-50%,-25px);
 }
 }
 
-/* =========================
-   HUD
-========================= */
+/* =========================================
+   RETRO HUD
+========================================= */
 
 #hud{
 position:fixed;
 top:12px;
 left:12px;
-color:#fff;
+color:#39ff14;
 z-index:100;
-font-size:14px
+font-size:14px;
+text-shadow:0 0 6px #39ff14;
 }
 
 .hudBox{
-background:rgba(0,0,0,.78);
-border:1px solid #444;
-border-radius:8px;
-padding:8px 12px;
-margin-bottom:7px
+background:#020702;
+border:1px solid #39ff14;
+padding:9px 12px;
+margin-bottom:7px;
+box-shadow:
+0 0 5px rgba(57,255,20,.4),
+inset 0 0 10px rgba(57,255,20,.05);
+}
+
+.hudBox::before{
+content:"[SYS]";
+color:#168b09;
+margin-right:5px;
 }
 
 #healthBar{
 width:190px;
-height:10px;
-background:#400;
-border-radius:10px;
+height:12px;
+background:#071107;
+border:1px solid #39ff14;
 margin-top:5px;
-overflow:hidden
+overflow:hidden;
 }
 
 #healthFill{
 height:100%;
 width:100%;
-background:#f33;
-transition:width .15s
+background:#39ff14;
+transition:width .15s;
 }
 
 #controls{
 position:fixed;
 top:12px;
 right:12px;
-color:#888;
+color:#39ff14;
 text-align:right;
 z-index:100;
-font-size:12px
+font-size:12px;
+line-height:1.6;
+text-shadow:0 0 5px #39ff14;
 }
 
-/* =========================
+/* =========================================
    INVENTORY
-========================= */
+========================================= */
 
 #trashButton{
 position:fixed;
@@ -531,36 +642,38 @@ right:18px;
 bottom:18px;
 width:65px;
 height:65px;
-border:2px solid #666;
-border-radius:14px;
-background:#17171c;
-color:white;
-font-size:31px;
+border:2px solid #39ff14;
+background:#020702;
+color:#39ff14;
+font-size:28px;
 display:none;
 align-items:center;
 justify-content:center;
 z-index:200;
-cursor:pointer
+cursor:pointer;
+box-shadow:0 0 10px rgba(57,255,20,.5);
 }
 
 #inventory{
 position:fixed;
 right:18px;
 bottom:95px;
-width:350px;
+width:360px;
 max-height:470px;
-box-sizing:border-box;
 padding:14px;
-background:rgba(8,8,12,.97);
-border:2px solid #444;
-border-radius:13px;
-color:#fff;
+background:#020702;
+border:2px solid #39ff14;
+color:#39ff14;
 display:none;
-z-index:199
+z-index:199;
+box-shadow:
+0 0 15px rgba(57,255,20,.4),
+inset 0 0 20px rgba(57,255,20,.04);
 }
 
 #inventory h2{
-margin:0 0 12px
+margin:0 0 12px;
+font-size:18px;
 }
 
 #items{
@@ -568,41 +681,41 @@ display:grid;
 grid-template-columns:1fr 1fr;
 gap:8px;
 max-height:370px;
-overflow:auto
+overflow:auto;
 }
 
 .item{
 min-height:90px;
-border:1px solid #444;
-background:#15151b;
-border-radius:9px;
+border:1px solid #247c18;
+background:#030a03;
 display:flex;
 flex-direction:column;
 align-items:center;
 justify-content:center;
 cursor:pointer;
-transition:.15s
+transition:.15s;
 }
 
 .item:hover{
-background:#292930;
-transform:scale(1.03)
+background:#0a1f0a;
+border-color:#39ff14;
+transform:scale(1.03);
 }
 
 .itemIcon{
-font-size:30px
+font-size:30px;
 }
 
 .itemName{
 font-size:12px;
 margin-top:4px;
-text-align:center
+text-align:center;
 }
 
 .itemCount{
-color:#888;
+color:#168b09;
 font-size:11px;
-margin-top:3px
+margin-top:3px;
 }
 
 #eraser{
@@ -610,31 +723,32 @@ position:fixed;
 left:50%;
 bottom:18px;
 transform:translateX(-50%);
-background:#17171c;
-border:1px solid #aaa;
-border-radius:8px;
+background:#020702;
+border:1px solid #39ff14;
 padding:9px 15px;
-color:#fff;
+color:#39ff14;
 display:none;
-z-index:200
+z-index:200;
 }
 
-/* =========================
-   WAVE / FLASH
-========================= */
+/* =========================================
+   WAVE
+========================================= */
 
 #waveText{
 position:fixed;
 left:50%;
 top:42%;
 transform:translate(-50%,-50%);
-color:#fff;
+color:#39ff14;
 font-size:55px;
 font-weight:bold;
 opacity:0;
 pointer-events:none;
 z-index:300;
-text-shadow:0 0 15px #fff,0 0 35px #fff
+text-shadow:
+0 0 10px #39ff14,
+0 0 30px #39ff14;
 }
 
 #speedFlash{
@@ -642,230 +756,176 @@ position:fixed;
 left:50%;
 bottom:75px;
 transform:translateX(-50%);
-color:#fff;
+color:#39ff14;
 font-size:18px;
 font-weight:bold;
 opacity:0;
 pointer-events:none;
-z-index:300
+z-index:300;
+text-shadow:0 0 8px #39ff14;
 }
 
 #slowOverlay{
 position:fixed;
 inset:0;
-background:rgba(0,255,80,.055);
+background:rgba(0,255,80,.06);
 pointer-events:none;
 z-index:350;
 display:none;
 }
 
-/* =========================
-   TOUGHNESS DEBUFF
-========================= */
-
-#toughnessOverlay{
-position:fixed;
-inset:0;
-background:rgba(170,0,255,.045);
-pointer-events:none;
-z-index:349;
-display:none
-}
-
-/* =========================
-   TIME BOMB
-========================= */
-
-#bombCountdown{
-position:fixed;
-left:50%;
-top:85px;
-transform:translateX(-50%);
-color:#ff7b00;
-font-size:25px;
-font-weight:bold;
-text-shadow:
-0 0 8px #ff5e00,
-0 0 20px #f00;
-z-index:400;
-display:none;
-pointer-events:none;
-animation:countdownPulse .5s infinite alternate
-}
-
-#bombWarning{
-position:fixed;
-left:50%;
-top:120px;
-transform:translateX(-50%);
-color:#ff3b00;
-font-size:14px;
-font-weight:bold;
-z-index:400;
-display:none;
-pointer-events:none;
-animation:warningFlash .4s infinite alternate
-}
-
-@keyframes countdownPulse{
-from{transform:translateX(-50%) scale(.9)}
-to{transform:translateX(-50%) scale(1.1)}
-}
-
-@keyframes warningFlash{
-from{opacity:.4}
-to{opacity:1}
-}
-
-/* =========================
-   FAKE MALWARE POPUPS
-========================= */
+/* =========================================
+   POPUPS
+========================================= */
 
 #malwarePopups{
 position:fixed;
 inset:0;
 z-index:1000;
-pointer-events:none
+pointer-events:none;
 }
 
 .malwarePopup{
 position:absolute;
 width:300px;
-background:#f1f1f1;
+background:#c0c0c0;
 color:#111;
-border:2px solid #777;
-box-shadow:
-0 0 15px rgba(255,0,0,.8),
-0 0 40px rgba(255,0,0,.35);
-font-family:Arial,sans-serif;
+border:2px solid #fff;
+box-shadow:4px 4px 0 #000;
+font-family:"Courier New",monospace;
 pointer-events:auto;
-animation:popupAppear .25s ease-out;
-user-select:none
-}
-
-@keyframes popupAppear{
-from{
-opacity:0;
-transform:scale(.3) rotate(-8deg)
-}
-to{
-opacity:1;
-transform:scale(1) rotate(0)
-}
 }
 
 .malwareTitle{
 height:28px;
-background:#0754a5;
+background:#000080;
 color:white;
 display:flex;
 align-items:center;
 justify-content:space-between;
 padding:0 5px 0 8px;
-box-sizing:border-box;
 font-size:13px;
-font-weight:bold
+font-weight:bold;
 }
 
 .malwareClose{
 width:22px;
 height:21px;
 padding:0;
-margin:0;
-border:0;
-border-radius:0;
-background:#c00;
-color:white;
+border:1px solid #000;
+background:#c0c0c0;
+color:#000;
 font-size:15px;
 font-weight:bold;
-line-height:18px;
-cursor:pointer
-}
-
-.malwareClose:hover{
-background:#f00;
-color:white
+cursor:pointer;
 }
 
 .malwareBody{
 padding:18px;
-text-align:center
+text-align:center;
 }
 
 .malwareWarning{
 font-size:38px;
-margin-bottom:7px
+margin-bottom:7px;
 }
 
 .malwareBody h3{
 margin:4px 0;
 color:#d00;
-font-size:21px
+font-size:21px;
 }
 
 .malwareBody p{
 font-size:13px;
-line-height:1.35
+line-height:1.35;
 }
 
 .malwareFakeButton{
 display:inline-block;
 margin-top:8px;
 padding:7px 14px;
-background:#d00;
-color:white;
+background:#c0c0c0;
+border:2px outset #fff;
+color:#111;
 font-weight:bold;
 font-size:12px;
-border-radius:3px
 }
 
-/* =========================
+/* =========================================
    START / GAME OVER
-========================= */
+========================================= */
 
 #startScreen,
 #gameOver{
 position:fixed;
 inset:0;
-background:rgba(0,0,0,.94);
-z-index:500;
-color:#fff;
+background:#020502;
+z-index:5000;
+color:#39ff14;
 display:flex;
 flex-direction:column;
 align-items:center;
 justify-content:center;
-text-align:center
+text-align:center;
 }
 
 #gameOver{
-display:none
+display:none;
 }
 
 #startScreen h1,
 #gameOver h1{
-font-size:50px;
-margin:0 0 15px
+font-size:48px;
+margin:0 0 15px;
+text-shadow:
+0 0 10px #39ff14,
+0 0 30px #39ff14;
+}
+
+#startScreen h1::before{
+content:"SYSTEM_86 // ";
+font-size:18px;
+display:block;
+margin-bottom:8px;
 }
 
 #startScreen p{
-color:#aaa;
+color:#26b817;
 line-height:1.6;
-max-width:700px
+max-width:750px;
 }
 
 button{
 padding:12px 30px;
-background:transparent;
-color:#fff;
-border:2px solid #fff;
-border-radius:8px;
+background:#020702;
+color:#39ff14;
+border:2px solid #39ff14;
 cursor:pointer;
-font-size:18px
+font-family:"Courier New",monospace;
+font-size:18px;
 }
 
 button:hover{
-background:#fff;
-color:#000
+background:#39ff14;
+color:#020702;
+}
+
+/* =========================================
+   STATUS TEXT
+========================================= */
+
+#purpleStatus{
+position:fixed;
+left:50%;
+top:70px;
+transform:translateX(-50%);
+color:#d000ff;
+font-size:13px;
+font-weight:bold;
+display:none;
+z-index:300;
+text-shadow:0 0 8px #d000ff;
 }
 </style>
 </head>
@@ -876,7 +936,6 @@ color:#000
 <div id="shield"></div>
 <div id="blockPreview"></div>
 <div id="slowOverlay"></div>
-<div id="toughnessOverlay"></div>
 
 <div id="bossBar">
 <div id="bossFill"></div>
@@ -885,49 +944,53 @@ color:#000
 <div id="bossName">THE ULTIMATE VIRUS</div>
 
 <div id="bombCountdown">TIME BOMB: 5</div>
-<div id="bombWarning">⚠ TIME BOMB ARMED ⚠</div>
+<div id="bombWarning">!!! TIME BOMB ARMED !!!</div>
+
+<div id="purpleStatus">
+TOUGHNESS VIRUS: 20
+</div>
 
 <div id="malwarePopups"></div>
 
 <div id="hud">
 
 <div class="hudBox">
-Wave: <b id="wave">0</b><br>
-Enemies: <b id="enemyCount">0</b><br>
-Score: <b id="score">0</b>
+WAVE: <b id="wave">0</b><br>
+ENEMIES: <b id="enemyCount">0</b><br>
+SCORE: <b id="score">0</b>
 </div>
 
 <div class="hudBox">
-Health
+HEALTH
 <div id="healthBar">
 <div id="healthFill"></div>
 </div>
 </div>
 
 <div class="hudBox">
-Speed: <b id="speed">1.00x</b><br>
-Toughness: <b id="toughness">1.00x</b>
+SPEED: <b id="speed">1.00x</b><br>
+TOUGHNESS: <b id="toughness">1.00x</b>
 </div>
 
 </div>
 
 <div id="controls">
-T = Trash / Inventory<br>
-E = Eraser Mode<br>
-Double-click loot = Activate
+[T] INVENTORY<br>
+[E] ERASER MODE<br>
+DOUBLE CLICK = USE LOOT
 </div>
 
 <div id="eraser">
-ERASER MODE — Press E again to turn off
+ERASER MODE // PRESS E TO EXIT
 </div>
 
 <div id="waveText"></div>
 <div id="speedFlash"></div>
 
-<div id="trashButton">🗑️</div>
+<div id="trashButton">▣</div>
 
 <div id="inventory">
-<h2>Loot Inventory</h2>
+<h2>=== LOOT STORAGE ===</h2>
 <div id="items"></div>
 </div>
 
@@ -936,20 +999,17 @@ ERASER MODE — Press E again to turn off
 <h1>ENERGY BALL</h1>
 
 <p>
-Drag your mouse to create defenses.<br>
-Enemies physically burrow through your defenses and damage
-the blocks while tunneling.<br><br>
+&gt; SYSTEM INITIALIZED<br>
+&gt; DEFEND THE CORE<br>
+&gt; BUILD WALLS WITH MOUSE DRAG<br>
+&gt; IMPACT SPEED x10 = VIRUS DESTRUCTION<br><br>
 
-You must be moving <b>10x the original speed</b> to become
-immune to enemy contact damage and destroy enemies by impact.<br><br>
+GREEN VIRUS = SPEED 0.5x<br>
+PURPLE VIRUS = TOUGHNESS 0.5x FOR 20 SEC<br>
+ORANGE VIRUS = 5 SECOND TIME BOMB<br>
+SPEED DEMON = FORWARD DESTRUCTION DASH<br><br>
 
-Green viruses slow the player to <b>0.50x speed</b> for 5 seconds.<br>
-Purple viruses reduce toughness to <b>0.50x</b> for 20 seconds.<br>
-Orange Time Bomb viruses freeze and explode 5 seconds after being destroyed.<br>
-Wave 20 contains the Ultimate Virus.
-</p>
-
-<button id="startButton">START</button>
+<button id="startButton">[ START SYSTEM ]</button>
 
 </div>
 
@@ -957,11 +1017,15 @@ Wave 20 contains the Ultimate Virus.
 
 <h1>GAME OVER</h1>
 <p id="finalScore"></p>
-<button id="restartButton">RESTART</button>
+<button id="restartButton">[ REBOOT ]</button>
 
 </div>
 
 <script>
+
+/* =========================================================
+   DOM
+========================================================= */
 
 const ball=document.getElementById("ball");
 const shield=document.getElementById("shield");
@@ -994,12 +1058,17 @@ const bossFill=document.getElementById("bossFill");
 const bossName=document.getElementById("bossName");
 
 const slowOverlay=document.getElementById("slowOverlay");
-const toughnessOverlay=document.getElementById("toughnessOverlay");
 
 const bombCountdown=document.getElementById("bombCountdown");
 const bombWarning=document.getElementById("bombWarning");
 
+const purpleStatus=document.getElementById("purpleStatus");
+
 const malwarePopups=document.getElementById("malwarePopups");
+
+/* =========================================================
+   CONSTANTS
+========================================================= */
 
 const BALL_SIZE=40;
 const BALL_RADIUS=20;
@@ -1014,6 +1083,10 @@ START_SPEED_Y
 
 const MAX_SPEED=100;
 
+/* =========================================================
+   GAME VARIABLES
+========================================================= */
+
 let x=(innerWidth-BALL_SIZE)/2;
 let y=(innerHeight-BALL_SIZE)/2;
 
@@ -1026,11 +1099,6 @@ let health=100;
 let maxHealth=100;
 
 let toughness=1;
-
-/* PURPLE TOUGHNESS DEBUFF */
-let normalToughness=1;
-let toughnessDebuffActive=false;
-let toughnessDebuffTimer=0;
 
 let wave=0;
 let score=0;
@@ -1073,20 +1141,28 @@ let damageBoostTimer=0;
 let slowFieldActive=false;
 let slowFieldTimer=0;
 
-/* GREEN VIRUS */
+/* =========================================================
+   PLAYER DEBUFFS
+========================================================= */
+
+/* Green virus */
 let playerSlowFactor=1;
 let playerSlowTimer=0;
 
-/* TIME BOMB */
+/* Purple virus */
+let purpleToughnessActive=false;
+let purpleToughnessTimer=0;
+
+/* Bomb */
 let bombActive=false;
 let bombTimer=0;
 let bombX=0;
 let bombY=0;
-let activeBombEnemy=null;
+let bombEnemy=null;
 
-/* =========================
+/* =========================================================
    INVENTORY
-========================= */
+========================================================= */
 
 const inventoryItems={
 
@@ -1133,8 +1209,12 @@ icon:"🔥"
 slowCore:{
 name:"Time Core",
 icon:"⏱️"
-}
+},
 
+speedDemon:{
+name:"Speed Demon",
+icon:"😈"
+}
 };
 
 const inventoryCounts={};
@@ -1143,9 +1223,9 @@ for(const type in inventoryItems){
 inventoryCounts[type]=0;
 }
 
-/* =========================
-   BASIC HELPERS
-========================= */
+/* =========================================================
+   HELPERS
+========================================================= */
 
 function getSpeed(){
 return Math.hypot(speedX,speedY);
@@ -1163,11 +1243,9 @@ speedX*=multiplier;
 speedY*=multiplier;
 
 }
-
 }
 
 function isBallFastEnoughForImmunity(){
-
 return getSpeed()>=ORIGINAL_SPEED*10;
 }
 
@@ -1180,8 +1258,7 @@ clearTimeout(showSpeedFlash.timer);
 
 showSpeedFlash.timer=setTimeout(()=>{
 speedFlash.style.opacity="0";
-},900);
-
+},1000);
 }
 
 function powerupAnimation(icon,name){
@@ -1200,29 +1277,19 @@ label.textContent=name;
 
 document.body.appendChild(label);
 
-const ring=document.createElement("div");
-
-ring.className="powerRing";
-
-document.body.appendChild(ring);
-
 ball.classList.remove("powerFlash");
-
 void ball.offsetWidth;
-
 ball.classList.add("powerFlash");
 
 setTimeout(()=>{
 iconElement.remove();
 label.remove();
-ring.remove();
 },1200);
-
 }
 
-/* =========================
+/* =========================================================
    BLOCKS
-========================= */
+========================================================= */
 
 function startBlock(event){
 
@@ -1232,7 +1299,6 @@ if(eraserMode){
 
 eraseAt(event.clientX,event.clientY);
 return;
-
 }
 
 if(event.target!==document.body)return;
@@ -1248,7 +1314,6 @@ dragCurrentY=dragStartY;
 blockPreview.style.display="block";
 
 updateBlockPreview();
-
 }
 
 function dragBlock(event){
@@ -1259,7 +1324,6 @@ dragCurrentX=event.clientX;
 dragCurrentY=event.clientY;
 
 updateBlockPreview();
-
 }
 
 function finishBlock(){
@@ -1280,7 +1344,6 @@ rect.top,
 rect.width,
 rect.height
 );
-
 }
 
 function getDragRectangle(){
@@ -1291,7 +1354,6 @@ top:Math.min(dragStartY,dragCurrentY),
 width:Math.abs(dragCurrentX-dragStartX),
 height:Math.abs(dragCurrentY-dragStartY)
 };
-
 }
 
 function updateBlockPreview(){
@@ -1302,7 +1364,6 @@ blockPreview.style.left=rect.left+"px";
 blockPreview.style.top=rect.top+"px";
 blockPreview.style.width=rect.width+"px";
 blockPreview.style.height=rect.height+"px";
-
 }
 
 function createBlock(left,top,width,height){
@@ -1332,7 +1393,6 @@ hp:maxHp,
 maxHp,
 element
 });
-
 }
 
 function eraseAt(mx,my){
@@ -1351,12 +1411,13 @@ my<=block.top+block.height
 block.element.remove();
 blocks.splice(i,1);
 return;
-
+}
+}
 }
 
-}
-
-}
+/* =========================================================
+   BALL / BLOCK COLLISION
+========================================================= */
 
 function checkBlockCollisions(){
 
@@ -1367,7 +1428,6 @@ for(const block of blocks){
 
 const left=block.left;
 const right=block.left+block.width;
-
 const top=block.top;
 const bottom=block.top+block.height;
 
@@ -1411,7 +1471,6 @@ normalY=-1;
 normalX=0;
 normalY=1;
 }
-
 }
 
 const overlap=BALL_RADIUS-distance;
@@ -1420,9 +1479,7 @@ x+=normalX*overlap;
 y+=normalY*overlap;
 
 kineticDefenseBounce(normalX,normalY);
-
 }
-
 }
 
 function checkCursorCollision(){
@@ -1459,7 +1516,6 @@ normalY=dy/distance;
 
 normalX=1;
 normalY=0;
-
 }
 
 x+=normalX*(BALL_RADIUS-distance);
@@ -1482,9 +1538,7 @@ speedX*=boost;
 speedY*=boost;
 
 limitSpeed();
-
 }
-
 }
 
 function kineticWindowBounce(normalX,normalY){
@@ -1511,16 +1565,6 @@ speedX*=energyBoost;
 speedY*=energyBoost;
 
 limitSpeed();
-
-if(impactSpeed>8){
-
-showSpeedFlash(
-"KINETIC ENERGY +"+
-(getSpeed()/ORIGINAL_SPEED).toFixed(2)+"x"
-);
-
-}
-
 }
 
 function kineticDefenseBounce(normalX,normalY){
@@ -1547,12 +1591,11 @@ speedX*=transfer;
 speedY*=transfer;
 
 limitSpeed();
-
 }
 
-/* =========================
-   ENEMIES
-========================= */
+/* =========================================================
+   SPAWN ENEMIES
+========================================================= */
 
 function spawnEnemy(
 type="red",
@@ -1585,7 +1628,6 @@ ey=innerHeight+40;
 ex=-40;
 ey=Math.random()*innerHeight;
 }
-
 }
 
 const boss=type==="boss";
@@ -1619,22 +1661,21 @@ y:ey,
 radius,
 
 speed:
-boss?0.65:
-bomb?0.7:
+boss?.65:
+bomb?.7:
 purple?
-(0.75+wave*.045+Math.random()*.2):
+(.75+wave*.045+Math.random()*.2):
 green?
-(0.65+wave*.045+Math.random()*.18):
+(.65+wave*.045+Math.random()*.18):
 popupEnemy?
-(0.75+wave*.045+Math.random()*.2):
-(0.82+wave*.055+Math.random()*.25),
+(.75+wave*.045+Math.random()*.2):
+(.82+wave*.055+Math.random()*.25),
 
 tunnelPower:
 boss?3.5:
 green?1.25:
-purple?1.15:
+purple?1.25:
 popupEnemy?1.1:
-bomb?1:
 1,
 
 damageTimer:0,
@@ -1653,23 +1694,17 @@ health:
 boss?5000:1,
 
 maxHealth:
-boss?5000:1,
-
-slowOnDeath:green,
-
-armed:false
-
+boss?5000:1
 };
 
 enemies.push(enemy);
 
 return enemy;
-
 }
 
-/* =========================
+/* =========================================================
    WAVES
-========================= */
+========================================================= */
 
 function startWave(){
 
@@ -1690,8 +1725,8 @@ if(wave===20){
 spawnUltimateBoss();
 
 waveSpawning=false;
-return;
 
+return;
 }
 
 const amount=
@@ -1714,40 +1749,40 @@ let type="red";
 
 const roll=Math.random();
 
-/* GREEN */
+/* Green speed virus */
 if(
-wave>=3 &&
-roll<Math.min(.12+wave*.018,.30)
+wave>=2 &&
+roll<Math.min(.14+wave*.012,.28)
 ){
 
 type="green";
 
 }
 
-/* PURPLE */
+/* Purple toughness virus */
 else if(
-wave>=2 &&
-roll<Math.min(.20+wave*.015,.34)
+wave>=3 &&
+roll<Math.min(.24+wave*.012,.38)
 ){
 
 type="purple";
 
 }
 
-/* POPUP */
+/* Popup virus */
 else if(
 wave>=4 &&
-roll<Math.min(.28+wave*.012,.42)
+roll<Math.min(.32+wave*.012,.48)
 ){
 
 type="popup";
 
 }
 
-/* BOMB */
+/* Bomb can now appear normally in waves */
 else if(
 wave>=2 &&
-roll<Math.min(.34+wave*.008,.48)
+roll<Math.min(.37+wave*.012,.53)
 ){
 
 type="bomb";
@@ -1757,20 +1792,39 @@ type="bomb";
 spawnEnemy(type);
 
 },i*spawnDelay);
-
 }
 
 /*
- Bombs are now normal wave enemies.
- No special forced bomb at the beginning.
- */
+Guaranteed bomb on wave 1,
+but it is still a normal enemy.
+*/
+
+if(wave===1){
+
+setTimeout(()=>{
+
+if(running){
+
+spawnEnemy(
+"bomb",
+innerWidth/2,
+80
+);
+
+showSpeedFlash(
+"!!! TIME BOMB VIRUS DETECTED !!!"
+);
+
+}
+
+},600);
+}
 
 setTimeout(()=>{
 
 waveSpawning=false;
 
 },amount*spawnDelay+700);
-
 }
 
 function spawnUltimateBoss(){
@@ -1789,7 +1843,7 @@ bossName.style.display="block";
 updateBossBar();
 
 showSpeedFlash(
-"THE ULTIMATE VIRUS HAS ARRIVED!"
+"!!! ULTIMATE VIRUS ONLINE !!!"
 );
 
 let summonCount=0;
@@ -1800,17 +1854,14 @@ if(!running||!bossAlive){
 
 clearInterval(summonInterval);
 return;
-
 }
 
-const bossExists=
-enemies.some(e=>e.boss);
+const bossExists=enemies.some(e=>e.boss);
 
 if(!bossExists){
 
 clearInterval(summonInterval);
 return;
-
 }
 
 for(
@@ -1819,36 +1870,24 @@ i<2+Math.min(4,Math.floor(summonCount/3));
 i++
 ){
 
-const angle=
-Math.random()*Math.PI*2;
-
-const bx=innerWidth/2;
-const by=Math.min(innerHeight/2,150);
-
-const randomRoll=Math.random();
-
-let type="red";
-
-if(randomRoll<.20){
-type="green";
-}else if(randomRoll<.38){
-type="purple";
-}else if(randomRoll<.52){
-type="bomb";
-}
+const angle=Math.random()*Math.PI*2;
 
 spawnEnemy(
-type,
-bx+Math.cos(angle)*70,
-by+Math.sin(angle)*70
+Math.random()<.25?
+"purple":
+Math.random()<.5?
+"green":
+"red",
+innerWidth/2+
+Math.cos(angle)*70,
+Math.min(innerHeight/2,150)+
+Math.sin(angle)*70
 );
-
 }
 
 summonCount++;
 
 },3500);
-
 }
 
 function checkWaveEnd(){
@@ -1865,8 +1904,8 @@ if(enemies.length!==0)return;
 if(wave>=20){
 
 gameWin();
-return;
 
+return;
 }
 
 waveTransition=true;
@@ -1880,7 +1919,6 @@ slowBallBackToOriginal();
 startWave();
 
 },1800);
-
 }
 
 function slowBallBackToOriginal(){
@@ -1893,61 +1931,46 @@ const ratio=ORIGINAL_SPEED/current;
 
 speedX*=ratio;
 speedY*=ratio;
-
 }
 
-/* =========================
+/* =========================================================
    TIME BOMB
-========================= */
+========================================================= */
 
-function armTimeBomb(enemy){
+function startTimeBomb(enemy){
 
 if(bombActive)return;
 
 bombActive=true;
 
-activeBombEnemy=enemy;
+bombEnemy=enemy;
 
 bombX=enemy.x;
 bombY=enemy.y;
 
-bombTimer=5*60;
-
-enemy.armed=true;
-
 /*
- Stop the bomb completely.
- */
+ 5 SECONDS
+*/
 
-enemy.speed=0;
-
-enemy.burrowing=false;
-enemy.burrowBlock=null;
-
-enemy.element.classList.remove("burrowing");
-enemy.element.classList.add("armed");
+bombTimer=5*60;
 
 bombCountdown.style.display="block";
 bombWarning.style.display="block";
 
 updateBombDisplay();
-
-showSpeedFlash(
-"⚠ BOMB ARMED — 5 SECONDS!"
-);
-
 }
 
 function updateBombDisplay(){
 
 if(!bombActive)return;
 
-const seconds=
-Math.ceil(bombTimer/60);
+const seconds=Math.max(
+1,
+Math.ceil(bombTimer/60)
+);
 
 bombCountdown.textContent=
-"TIME BOMB: "+Math.max(1,seconds);
-
+"TIME BOMB: "+seconds;
 }
 
 function updateTimeBomb(){
@@ -1956,111 +1979,120 @@ if(!bombActive)return;
 
 bombTimer--;
 
-if(activeBombEnemy){
+if(bombTimer%5===0){
+updateBombDisplay();
+}
 
-bombX=activeBombEnemy.x;
-bombY=activeBombEnemy.y;
+if(bombEnemy){
 
+/*
+ Bomb NEVER moves.
+*/
+
+bombEnemy.x=bombX;
+bombEnemy.y=bombY;
+
+bombEnemy.element.style.left=
+(bombX-bombEnemy.radius)+"px";
+
+bombEnemy.element.style.top=
+(bombY-bombEnemy.radius)+"px";
 }
 
 updateBombDisplay();
 
-if(
-bombTimer<=0
-){
+if(bombTimer<=0){
 
 explodeTimeBomb();
-
 }
-
 }
 
 function explodeTimeBomb(){
 
 if(!bombActive)return;
 
-const explosionX=bombX;
-const explosionY=bombY;
-
 bombActive=false;
+
+if(bombEnemy){
+
+bombEnemy.element.remove();
+
+const index=enemies.indexOf(bombEnemy);
+
+if(index>=0){
+
+enemies.splice(index,1);
+
+}
+}
 
 bombCountdown.style.display="none";
 bombWarning.style.display="none";
 
-/*
- Remove the bomb only AFTER it explodes.
- */
+const fire=document.createElement("div");
 
-if(activeBombEnemy){
+fire.className="bombFire";
 
-const index=enemies.indexOf(activeBombEnemy);
+fire.style.left=bombX+"px";
+fire.style.top=bombY+"px";
 
-if(index>=0){
+document.body.appendChild(fire);
 
-activeBombEnemy.element.remove();
-enemies.splice(index,1);
-
-}
-
-}
-
-activeBombEnemy=null;
-
-/*
- BIG FIRE EXPLOSION
- */
+setTimeout(()=>{
+fire.remove();
+},700);
 
 createParticles(
-explosionX,
-explosionY,
+bombX,
+bombY,
 "#ff7b00",
-130
+120
 );
 
 createParticles(
-explosionX,
-explosionY,
+bombX,
+bombY,
 "#ff0000",
-100
-);
-
-createParticles(
-explosionX,
-explosionY,
-"#ffff00",
-60
+80
 );
 
 /*
- Explosion radius.
- */
-
-const EXPLOSION_RADIUS=300;
+ EXACTLY HALF OF ORIGINAL HEALTH.
+ Original HP = 100.
+ Explosion = 50 damage.
+*/
 
 const distance=
 Math.hypot(
-(x+BALL_RADIUS)-explosionX,
-(y+BALL_RADIUS)-explosionY
+(x+BALL_RADIUS)-bombX,
+(y+BALL_RADIUS)-bombY
 );
 
 /*
- EXACTLY HALF OF ORIGINAL HEALTH
- if caught in the main explosion.
- */
+ Large radius.
+ If caught in fire:
+ 50 damage.
+*/
 
-if(distance<=EXPLOSION_RADIUS){
+if(distance<=330){
 
 damageBall(50);
 
 showSpeedFlash(
-"💥 TIME BOMB HIT! -50 HP"
+"!!! BOMB HIT: -50 HP !!!"
+);
+
+}else{
+
+showSpeedFlash(
+"TIME BOMB DETONATED"
 );
 
 }
 
 /*
- Damage blocks.
- */
+ Destroy nearby blocks.
+*/
 
 for(let i=blocks.length-1;i>=0;i--){
 
@@ -2076,19 +2108,13 @@ block.height/2;
 
 const d=
 Math.hypot(
-centerX-explosionX,
-centerY-explosionY
+centerX-bombX,
+centerY-bombY
 );
 
-if(d<EXPLOSION_RADIUS){
+if(d<300){
 
-const damage=
-Math.max(
-80,
-220*(1-d/EXPLOSION_RADIUS)
-);
-
-block.hp-=damage;
+block.hp-=180;
 
 if(block.hp<=0){
 
@@ -2097,57 +2123,19 @@ blocks.splice(i,1);
 
 }else{
 
-const hpRatio=
-Math.max(
-0,
-block.hp/block.maxHp
-);
+block.element.style.opacity=".3";
 
-block.element.style.opacity=
-.22+hpRatio*.78;
+}
+}
+}
 
-block.element.classList.add("damaged");
+bombEnemy=null;
 
 }
 
-}
-
-}
-
-/*
- Push normal enemies away from the explosion.
- */
-
-for(const enemy of enemies){
-
-if(enemy.boss)continue;
-
-const dx=enemy.x-explosionX;
-const dy=enemy.y-explosionY;
-
-const d=Math.hypot(dx,dy)||1;
-
-if(d<EXPLOSION_RADIUS){
-
-const push=
-(1-d/EXPLOSION_RADIUS)*25;
-
-enemy.x+=dx/d*push;
-enemy.y+=dy/d*push;
-
-}
-
-}
-
-showSpeedFlash(
-"💥 TIME BOMB EXPLODED!"
-);
-
-}
-
-/* =========================
+/* =========================================================
    WAVE TEXT
-========================= */
+========================================================= */
 
 function showWave(text){
 
@@ -2157,12 +2145,11 @@ waveText.style.opacity="1";
 setTimeout(()=>{
 waveText.style.opacity="0";
 },1200);
-
 }
 
-/* =========================
+/* =========================================================
    TUNNELING
-========================= */
+========================================================= */
 
 function circleRect(
 cx,cy,radius,rx,ry,rw,rh
@@ -2181,7 +2168,6 @@ return(
 dx*dx+
 dy*dy
 )<=radius*radius;
-
 }
 
 function findBlockingBlock(enemy,dirX,dirY){
@@ -2208,18 +2194,13 @@ block.height
 ){
 
 return block;
-
 }
-
 }
 
 return null;
-
 }
 
 function burrowEnemy(enemy,block,dirX,dirY){
-
-if(enemy.armed)return;
 
 enemy.burrowing=true;
 enemy.burrowBlock=block;
@@ -2267,7 +2248,6 @@ enemy.burrowBlock=null;
 enemy.element.classList.remove("burrowing");
 
 return;
-
 }
 
 const blockCenterX=
@@ -2291,14 +2271,12 @@ enemy.burrowing=false;
 enemy.burrowBlock=null;
 
 enemy.element.classList.remove("burrowing");
-
+}
 }
 
-}
-
-/* =========================
+/* =========================================================
    ENEMY UPDATE
-========================= */
+========================================================= */
 
 function updateEnemies(){
 
@@ -2306,20 +2284,25 @@ for(let i=enemies.length-1;i>=0;i--){
 
 const enemy=enemies[i];
 
-/*
- ARMED BOMBS DO NOTHING EXCEPT WAIT.
- */
+if(enemy.bomb){
 
-if(enemy.armed){
+/*
+ Bomb is frozen once activated.
+*/
+
+if(bombActive&&enemy===bombEnemy){
+
+enemy.x=bombX;
+enemy.y=bombY;
 
 enemy.element.style.left=
-(enemy.x-enemy.radius)+"px";
+(bombX-enemy.radius)+"px";
 
 enemy.element.style.top=
-(enemy.y-enemy.radius)+"px";
+(bombY-enemy.radius)+"px";
 
 continue;
-
+}
 }
 
 const targetX=x+BALL_RADIUS;
@@ -2353,7 +2336,6 @@ enemy.burrowing=false;
 enemy.burrowBlock=null;
 
 enemy.element.classList.remove("burrowing");
-
 }
 
 }else{
@@ -2383,14 +2365,10 @@ movement*=.45;
 
 enemy.x+=dirX*movement;
 enemy.y+=dirY*movement;
-
+}
 }
 
-}
-
-/* =========================
-   BALL COLLISION
-========================= */
+/* BALL COLLISION */
 
 const ballX=x+BALL_RADIUS;
 const ballY=y+BALL_RADIUS;
@@ -2406,10 +2384,6 @@ BALL_RADIUS+
 enemy.radius+
 6;
 
-/*
- FAST BALL KILLS NORMAL ENEMIES
- */
-
 if(
 hitDistance<=killRadius &&
 isBallFastEnoughForImmunity()
@@ -2417,12 +2391,18 @@ isBallFastEnoughForImmunity()
 
 killEnemy(i);
 continue;
+}
+
+/* Shield */
+
+if(
+shieldActive &&
+hitDistance<killRadius+45
+){
 
 }
 
-/*
- Contact damage.
- */
+/* Contact damage */
 
 if(
 hitDistance<=BALL_RADIUS+enemy.radius+5
@@ -2435,18 +2415,16 @@ enemy.damageTimer<=0
 ){
 
 damageBall(
-(enemy.boss?20:
+enemy.boss?20:
 enemy.green?8:
-enemy.purple?9:
+enemy.purple?8:
 enemy.bomb?12:
 enemy.popupEnemy?7:
-6)/toughness
+6
 );
 
 enemy.damageTimer=30;
-
 }
-
 }
 
 enemy.damageTimer--;
@@ -2456,24 +2434,24 @@ enemy.element.style.left=
 
 enemy.element.style.top=
 (enemy.y-enemy.radius)+"px";
-
 }
 
 enemyCountDisplay.textContent=enemies.length;
 
 checkWaveEnd();
-
 }
 
-/* =========================
+/* =========================================================
    KILL ENEMY
-========================= */
+========================================================= */
 
 function killEnemy(index){
 
 if(index<0||index>=enemies.length)return;
 
 const enemy=enemies[index];
+
+/* BOSS */
 
 if(enemy.boss){
 
@@ -2498,52 +2476,53 @@ spawnLoot(
 enemy.x+(Math.random()-.5)*100,
 enemy.y+(Math.random()-.5)*100
 );
-
 }
+
+enemy.element.remove();
+enemies.splice(index,1);
+
+showSpeedFlash(
+"!!! ULTIMATE VIRUS DESTROYED !!!"
+);
+
+return;
+}
+
+/* BOMB */
+
+if(enemy.bomb){
+
+score+=50;
+
+bombX=enemy.x;
+bombY=enemy.y;
+
+createParticles(
+enemy.x,
+enemy.y,
+"#ff9d00",
+30
+);
+
+/*
+ Remove the enemy visually,
+ but DO NOT explode immediately.
+*/
 
 enemy.element.remove();
 
 enemies.splice(index,1);
 
+startTimeBomb(enemy);
+
 showSpeedFlash(
-"ULTIMATE VIRUS DESTROYED!"
+"TIME BOMB ARMED // 5 SEC"
 );
 
 return;
-
 }
 
-/* =========================
-   TIME BOMB
-========================= */
-
-/*
- IMPORTANT:
- The bomb stays alive and visible.
- It becomes stationary and explodes after 5 seconds.
- */
-
-if(enemy.bomb){
-
-if(!enemy.armed){
-
-score+=50;
-
-armTimeBomb(enemy);
-
-showSpeedFlash(
-"💣 TIME BOMB ARMED — 5 SECONDS!"
-);
-
-}
-
-return;
-
-}
-
-/* =========================
-   GREEN VIRUS
-========================= */
+/* GREEN SPEED VIRUS */
 
 if(enemy.green){
 
@@ -2559,14 +2538,11 @@ enemy.y,
 applyPlayerSlow();
 
 showSpeedFlash(
-"GREEN VIRUS: SPEED = 0.50x"
+"GREEN VIRUS // SPEED = 0.50x"
 );
-
 }
 
-/* =========================
-   PURPLE VIRUS
-========================= */
+/* PURPLE TOUGHNESS VIRUS */
 
 if(enemy.purple){
 
@@ -2575,21 +2551,18 @@ score+=30;
 createParticles(
 enemy.x,
 enemy.y,
-"#c000ff",
+"#b000ff",
 45
 );
 
-applyToughnessDebuff();
+applyPurpleToughness();
 
 showSpeedFlash(
-"PURPLE VIRUS: TOUGHNESS = 0.50x"
+"PURPLE VIRUS // TOUGHNESS = 0.50x"
 );
-
 }
 
-/* =========================
-   POPUP VIRUS
-========================= */
+/* POPUP VIRUS */
 
 if(enemy.popupEnemy){
 
@@ -2608,9 +2581,8 @@ enemy.y
 );
 
 showSpeedFlash(
-"⚠ POPUP VIRUS ATTACK!"
+"POPUP VIRUS ATTACK"
 );
-
 }
 
 if(
@@ -2627,8 +2599,9 @@ enemy.y,
 "#ff0000",
 14
 );
-
 }
+
+/* LOOT */
 
 const lootChance=
 Math.min(
@@ -2645,36 +2618,35 @@ spawnLoot(
 enemy.x,
 enemy.y
 );
-
 }
 
 enemy.element.remove();
 
 enemies.splice(index,1);
-
 }
 
-/* =========================
-   PLAYER SLOW
-========================= */
+/* =========================================================
+   GREEN SPEED VIRUS
+========================================================= */
 
 function applyPlayerSlow(){
 
 /*
- Restore the velocity first if an old slow
- is already active.
- */
+ Remove previous multiplier cleanly.
+*/
 
 if(playerSlowFactor!==1){
 
 speedX/=playerSlowFactor;
 speedY/=playerSlowFactor;
-
 }
 
+playerSlowFactor=.5;
+
 /*
- EXACTLY 0.50x ORIGINAL SPEED.
- */
+ SPEED IS NOW EXACTLY 0.5 OF
+ THE CURRENT ORIGINAL BASE VELOCITY DIRECTION.
+*/
 
 const current=getSpeed();
 
@@ -2683,20 +2655,18 @@ if(current>0){
 const targetSpeed=
 ORIGINAL_SPEED*.5;
 
-const ratio=
-targetSpeed/current;
+speedX=
+speedX/current*
+targetSpeed;
 
-speedX*=ratio;
-speedY*=ratio;
-
+speedY=
+speedY/current*
+targetSpeed;
 }
-
-playerSlowFactor=.5;
 
 playerSlowTimer=60*5;
 
 slowOverlay.style.display="block";
-
 }
 
 function updatePlayerSlow(){
@@ -2705,24 +2675,24 @@ if(playerSlowTimer<=0)return;
 
 playerSlowTimer--;
 
-if(
-playerSlowTimer<=0
-){
+if(playerSlowTimer<=0){
 
 /*
- Restore to original speed.
- */
+ Return to normal original speed,
+ preserving direction.
+*/
 
 const current=getSpeed();
 
 if(current>0){
 
-const ratio=
-ORIGINAL_SPEED/current;
+speedX=
+speedX/current*
+ORIGINAL_SPEED;
 
-speedX*=ratio;
-speedY*=ratio;
-
+speedY=
+speedY/current*
+ORIGINAL_SPEED;
 }
 
 playerSlowFactor=1;
@@ -2732,65 +2702,54 @@ slowOverlay.style.display="none";
 showSpeedFlash(
 "GREEN SLOW EXPIRED"
 );
-
+}
 }
 
-}
+/* =========================================================
+   PURPLE TOUGHNESS VIRUS
+========================================================= */
 
-/* =========================
-   PURPLE TOUGHNESS DEBUFF
-========================= */
+function applyPurpleToughness(){
 
-function applyToughnessDebuff(){
-
-/*
- If already debuffed, reset the timer
- but keep the original toughness.
- */
-
-if(!toughnessDebuffActive){
-
-normalToughness=toughness;
-
-}
-
-toughnessDebuffActive=true;
+purpleToughnessActive=true;
+purpleToughnessTimer=60*20;
 
 toughness=.5;
 
-toughnessDebuffTimer=60*20;
-
-toughnessOverlay.style.display="block";
+purpleStatus.style.display="block";
 
 }
 
-function updateToughnessDebuff(){
+function updatePurpleToughness(){
 
-if(!toughnessDebuffActive)return;
+if(!purpleToughnessActive)return;
 
-toughnessDebuffTimer--;
+purpleToughnessTimer--;
 
-if(toughnessDebuffTimer<=0){
+const seconds=
+Math.ceil(purpleToughnessTimer/60);
 
-toughness=normalToughness;
+purpleStatus.textContent=
+"TOUGHNESS VIRUS: "+seconds;
 
-toughnessDebuffActive=false;
+if(purpleToughnessTimer<=0){
 
-toughnessDebuffTimer=0;
+purpleToughnessActive=false;
+purpleToughnessTimer=0;
 
-toughnessOverlay.style.display="none";
+toughness=1;
+
+purpleStatus.style.display="none";
 
 showSpeedFlash(
-"PURPLE TOUGHNESS DEBUFF EXPIRED"
+"TOUGHNESS VIRUS EXPIRED"
 );
-
+}
 }
 
-}
-
-/* =========================
+/* =========================================================
    BOSS BAR
-========================= */
+========================================================= */
 
 function updateBossBar(){
 
@@ -2802,7 +2761,6 @@ bossBar.style.display="none";
 bossName.style.display="none";
 
 return;
-
 }
 
 const percent=
@@ -2813,12 +2771,11 @@ boss.health/boss.maxHealth*100
 
 bossFill.style.width=
 percent+"%";
-
 }
 
-/* =========================
+/* =========================================================
    LOOT
-========================= */
+========================================================= */
 
 function spawnLoot(px,py){
 
@@ -2826,42 +2783,45 @@ const random=Math.random();
 
 let type;
 
-if(random<.14){
+if(random<.10){
 
 type="shieldPlug";
 
-}else if(random<.27){
+}else if(random<.20){
 
 type="toughnessChip";
 
-}else if(random<.39){
+}else if(random<.30){
 
 type="repairCore";
 
-}else if(random<.51){
+}else if(random<.40){
 
 type="speedCore";
 
-}else if(random<.63){
+}else if(random<.50){
 
 type="blastCore";
 
-}else if(random<.75){
+}else if(random<.60){
 
 type="magnetCore";
 
-}else if(random<.85){
+}else if(random<.70){
 
 type="phaseCore";
 
-}else if(random<.94){
+}else if(random<.80){
 
 type="powerCore";
 
-}else{
+}else if(random<.90){
 
 type="slowCore";
 
+}else{
+
+type="speedDemon";
 }
 
 const element=document.createElement("div");
@@ -2885,9 +2845,7 @@ type,
 life:1400,
 
 element
-
 });
-
 }
 
 function updateLoot(){
@@ -2915,9 +2873,7 @@ item.element.style.left=
 
 item.element.style.top=
 (item.y-15)+"px";
-
 }
-
 }
 
 const distance=
@@ -2933,7 +2889,7 @@ inventoryCounts[item.type]++;
 createParticles(
 item.x,
 item.y,
-"#ffffff",
+"#39ff14",
 12
 );
 
@@ -2944,18 +2900,15 @@ loot.splice(i,1);
 renderInventory();
 
 continue;
-
 }
 
 if(item.life<=0){
 
 item.element.remove();
+
 loot.splice(i,1);
-
 }
-
 }
-
 }
 
 function renderInventory(){
@@ -2980,12 +2933,14 @@ item.innerHTML=`
 <div class="itemIcon">
 ${inventoryItems[type].icon}
 </div>
+
 <div class="itemName">
 ${inventoryItems[type].name}
 </div>
+
 <div class="itemCount">
 x${count}<br>
-Double-click to activate
+DOUBLE CLICK
 </div>
 `;
 
@@ -2997,7 +2952,6 @@ activateLoot(type);
 );
 
 itemsPanel.appendChild(item);
-
 }
 
 if(!found){
@@ -3006,20 +2960,18 @@ itemsPanel.innerHTML=`
 <div style="
 grid-column:1/-1;
 text-align:center;
-color:#777;
+color:#168b09;
 padding:30px;
 ">
-No loot yet.
+NO LOOT DETECTED.
 </div>
 `;
-
+}
 }
 
-}
-
-/* =========================
+/* =========================================================
    POWERUPS
-========================= */
+========================================================= */
 
 function activateLoot(type){
 
@@ -3034,17 +2986,7 @@ shieldTimer=600;
 
 powerupAnimation(
 "🛡️",
-"SHIELD ONLINE — 10 SECONDS"
-);
-
-shield.classList.remove("powerupActive");
-
-void shield.offsetWidth;
-
-shield.classList.add("powerupActive");
-
-showSpeedFlash(
-"SHIELD ONLINE"
+"SHIELD ONLINE // 10 SEC"
 );
 
 }
@@ -3053,18 +2995,13 @@ if(type==="toughnessChip"){
 
 toughness+=.4;
 
-if(!toughnessDebuffActive){
-normalToughness=toughness;
-}
-
 speedX*=.78;
 speedY*=.78;
 
 powerupAnimation(
 "🔩",
-"TOUGHNESS INCREASED"
+"TOUGHNESS +0.40"
 );
-
 }
 
 if(type==="repairCore"){
@@ -3076,9 +3013,8 @@ health+35
 
 powerupAnimation(
 "❤️",
-"REPAIRED +35 HP"
+"REPAIR +35 HP"
 );
-
 }
 
 if(type==="speedCore"){
@@ -3092,7 +3028,6 @@ powerupAnimation(
 "⚡",
 "SPEED CORE"
 );
-
 }
 
 if(type==="blastCore"){
@@ -3104,23 +3039,10 @@ powerupAnimation(
 
 for(let i=enemies.length-1;i>=0;i--){
 
-const enemy=enemies[i];
-
-const distance=
-Math.hypot(
-enemy.x-(x+BALL_RADIUS),
-enemy.y-(y+BALL_RADIUS)
-);
-
-if(
-distance<320 &&
-!enemy.boss
-){
+if(!enemies[i].boss){
 
 killEnemy(i);
-
 }
-
 }
 
 createParticles(
@@ -3129,7 +3051,6 @@ y+BALL_RADIUS,
 "#ffff00",
 80
 );
-
 }
 
 if(type==="magnetCore"){
@@ -3141,7 +3062,6 @@ powerupAnimation(
 "🧲",
 "MAGNET ACTIVE"
 );
-
 }
 
 if(type==="phaseCore"){
@@ -3153,7 +3073,6 @@ powerupAnimation(
 "🔷",
 "PHASE SHIELD"
 );
-
 }
 
 if(type==="powerCore"){
@@ -3165,7 +3084,6 @@ powerupAnimation(
 "🔥",
 "POWER BOOST"
 );
-
 }
 
 if(type==="slowCore"){
@@ -3177,17 +3095,233 @@ powerupAnimation(
 "⏱️",
 "TIME SLOW"
 );
+}
 
+/* =====================================================
+   SPEED DEMON
+===================================================== */
+
+if(type==="speedDemon"){
+
+activateSpeedDemon();
 }
 
 renderInventory();
 updateHUD();
-
 }
 
-/* =========================
+/* =========================================================
+   SPEED DEMON
+========================================================= */
+
+function activateSpeedDemon(){
+
+const currentSpeed=getSpeed();
+
+if(currentSpeed<=0)return;
+
+/*
+ Preserve the CURRENT direction.
+*/
+
+const dirX=speedX/currentSpeed;
+const dirY=speedY/currentSpeed;
+
+/*
+ Dash distance.
+*/
+
+const dashDistance=innerWidth+innerHeight;
+
+const startX=x+BALL_RADIUS;
+const startY=y+BALL_RADIUS;
+
+const endX=startX+dirX*dashDistance;
+const endY=startY+dirY*dashDistance;
+
+/*
+ Draw retro laser trail.
+*/
+
+const line=document.createElement("div");
+
+line.className="speedDemonLine";
+
+const length=
+Math.hypot(
+endX-startX,
+endY-startY
+);
+
+line.style.width=length+"px";
+line.style.left=startX+"px";
+line.style.top=startY+"px";
+
+line.style.transform=
+"rotate("+Math.atan2(
+endY-startY,
+endX-startX
+)+"rad)";
+
+document.body.appendChild(line);
+
+setTimeout(()=>{
+line.remove();
+},550);
+
+/*
+ Find every enemy intersecting
+ the dash line.
+*/
+
+for(let i=enemies.length-1;i>=0;i--){
+
+const enemy=enemies[i];
+
+if(enemy.boss){
+
+/*
+ Speed Demon hurts the boss.
+*/
+
+const distanceToLine=
+pointLineDistance(
+enemy.x,
+enemy.y,
+startX,
+startY,
+endX,
+endY
+);
+
+if(distanceToLine<enemy.radius+25){
+
+enemy.health-=400;
+
+createParticles(
+enemy.x,
+enemy.y,
+"#ffff00",
+25
+);
+
+updateBossBar();
+
+if(enemy.health<=0){
+
+killEnemy(i);
+}
+}
+
+continue;
+}
+
+const distanceToLine=
+pointLineDistance(
+enemy.x,
+enemy.y,
+startX,
+startY,
+endX,
+endY
+);
+
+if(distanceToLine<
+enemy.radius+35
+){
+
+killEnemy(i);
+}
+}
+
+/*
+ DASH THE PLAYER FORWARD.
+*/
+
+const maxX=innerWidth-BALL_SIZE;
+const maxY=innerHeight-BALL_SIZE;
+
+x=Math.max(
+0,
+Math.min(
+maxX,
+x+dirX*500
+)
+);
+
+y=Math.max(
+0,
+Math.min(
+maxY,
+y+dirY*500
+)
+);
+
+/*
+ Make the dash feel powerful.
+*/
+
+speedX=dirX*28;
+speedY=dirY*28;
+
+limitSpeed();
+
+createParticles(
+startX,
+startY,
+"#ffff00",
+60
+);
+
+powerupAnimation(
+"😈",
+"SPEED DEMON // DASH"
+);
+
+showSpeedFlash(
+"!!! SPEED DEMON !!!"
+);
+}
+
+function pointLineDistance(
+px,py,
+x1,y1,
+x2,y2
+){
+
+const dx=x2-x1;
+const dy=y2-y1;
+
+if(dx===0&&dy===0){
+
+return Math.hypot(px-x1,py-y1);
+}
+
+const t=
+Math.max(
+0,
+Math.min(
+1,
+(
+(px-x1)*dx+
+(py-y1)*dy
+)/
+(dx*dx+dy*dy)
+)
+);
+
+const closestX=x1+t*dx;
+const closestY=y1+t*dy;
+
+return Math.hypot(
+px-closestX,
+py-closestY
+);
+}
+
+/* =========================================================
    POWERUP TIMERS
-========================= */
+========================================================= */
 
 function updatePowerups(){
 
@@ -3200,11 +3334,9 @@ if(shieldTimer<=0){
 shieldActive=false;
 
 showSpeedFlash(
-"SHIELD EXPIRED"
+"SHIELD OFFLINE"
 );
-
 }
-
 }
 
 if(magnetTimer>0){
@@ -3214,7 +3346,6 @@ magnetTimer--;
 }else{
 
 magnetActive=false;
-
 }
 
 if(phaseShieldTimer>0){
@@ -3224,7 +3355,6 @@ phaseShieldTimer--;
 }else{
 
 phaseShieldActive=false;
-
 }
 
 if(damageBoostTimer>0){
@@ -3234,7 +3364,6 @@ damageBoostTimer--;
 }else{
 
 damageBoost=1;
-
 }
 
 if(slowFieldTimer>0){
@@ -3244,14 +3373,12 @@ slowFieldTimer--;
 }else{
 
 slowFieldActive=false;
-
+}
 }
 
-}
-
-/* =========================
+/* =========================================================
    SHIELD
-========================= */
+========================================================= */
 
 function updateShield(){
 
@@ -3259,7 +3386,6 @@ if(!shieldActive){
 
 shield.style.display="none";
 return;
-
 }
 
 shield.style.display="block";
@@ -3280,17 +3406,15 @@ centerY+
 Math.sin(shieldAngle)*orbit;
 
 shield.style.left=
-(shieldX-29)+"px";
+(shieldX-35)+"px";
 
 shield.style.top=
-(shieldY-39)+"px";
-
-const rotation=
-shieldAngle*180/Math.PI+90;
+(shieldY-45)+"px";
 
 shield.style.transform=
-"rotate("+rotation+"deg)";
-
+"rotate("+
+(shieldAngle*180/Math.PI+90)+
+"deg)";
 }
 
 function checkShieldCollision(){
@@ -3312,8 +3436,6 @@ for(let i=enemies.length-1;i>=0;i--){
 
 const enemy=enemies[i];
 
-if(enemy.armed)continue;
-
 const distance=
 Math.hypot(
 enemy.x-shieldX,
@@ -3331,18 +3453,14 @@ killEnemy(i);
 enemy.health-=15;
 
 updateBossBar();
-
+}
+}
+}
 }
 
-}
-
-}
-
-}
-
-/* =========================
+/* =========================================================
    DAMAGE
-========================= */
+========================================================= */
 
 function damageBall(amount){
 
@@ -3352,24 +3470,30 @@ phaseShieldActive
 ){
 
 return;
-
 }
 
-health-=amount;
+/*
+ Lower toughness = more damage.
+ Purple virus sets toughness to .5,
+ therefore damage doubles.
+*/
 
-health=Math.max(0,health);
+health-=amount/toughness;
+
+health=Math.max(
+0,
+health
+);
 
 if(health<=0){
 
 gameOver();
-
+}
 }
 
-}
-
-/* =========================
+/* =========================================================
    PARTICLES
-========================= */
+========================================================= */
 
 function createParticles(px,py,color,amount){
 
@@ -3380,12 +3504,18 @@ const particle=document.createElement("div");
 particle.style.position="fixed";
 particle.style.left=px+"px";
 particle.style.top=py+"px";
-particle.style.width=
-(3+Math.random()*5)+"px";
-particle.style.height=
-(3+Math.random()*5)+"px";
+
+const size=
+3+Math.random()*5;
+
+particle.style.width=size+"px";
+particle.style.height=size+"px";
+
 particle.style.borderRadius="50%";
 particle.style.background=color;
+particle.style.boxShadow=
+"0 0 5px "+color;
+
 particle.style.pointerEvents="none";
 particle.style.zIndex="100";
 
@@ -3427,20 +3557,16 @@ requestAnimationFrame(animate);
 }else{
 
 particle.remove();
-
 }
-
 }
 
 animate();
-
+}
 }
 
-}
-
-/* =========================
-   MALWARE POPUPS
-========================= */
+/* =========================================================
+   MALWARE
+========================================================= */
 
 function spawnMalwarePopups(px,py){
 
@@ -3462,9 +3588,7 @@ py+
 );
 
 },i*90);
-
 }
-
 }
 
 function createMalwarePopup(px,py){
@@ -3502,7 +3626,7 @@ popup.innerHTML=`
 <div class="malwareTitle">
 
 <span>
-FREE MALWARE REMOVAL
+VIRUS.EXE
 </span>
 
 <button class="malwareClose">
@@ -3514,24 +3638,23 @@ FREE MALWARE REMOVAL
 <div class="malwareBody">
 
 <div class="malwareWarning">
-⚠️
+⚠
 </div>
 
 <h3>
-VIRUS DETECTED!
+VIRUS DETECTED
 </h3>
 
 <p>
-Your computer may have been infected.
-Click the X to close this fake warning.
+SYSTEM DAMAGE POSSIBLE.
+CLOSE THIS WINDOW.
 </p>
 
 <div class="malwareFakeButton">
-FREE MALWARE REMOVAL
+REMOVE VIRUS
 </div>
 
 </div>
-
 `;
 
 const closeButton=
@@ -3543,22 +3666,15 @@ event=>{
 
 event.stopPropagation();
 
-popup.style.animation=
-"popupAppear .2s reverse";
-
-setTimeout(()=>{
 popup.remove();
-},180);
-
 });
 
 malwarePopups.appendChild(popup);
-
 }
 
-/* =========================
+/* =========================================================
    BALL MOVEMENT
-========================= */
+========================================================= */
 
 function moveBall(){
 
@@ -3589,48 +3705,45 @@ innerHeight-BALL_SIZE;
 if(x<=0&&speedX<0){
 
 x=0;
-kineticWindowBounce(1,0);
 
+kineticWindowBounce(1,0);
 }
 
 if(x>=maxX&&speedX>0){
 
 x=maxX;
-kineticWindowBounce(-1,0);
 
+kineticWindowBounce(-1,0);
 }
 
 if(y<=0&&speedY<0){
 
 y=0;
-kineticWindowBounce(0,1);
 
+kineticWindowBounce(0,1);
 }
 
 if(y>=maxY&&speedY>0){
 
 y=maxY;
-kineticWindowBounce(0,-1);
 
+kineticWindowBounce(0,-1);
 }
 
 checkCursorCollision();
 checkBlockCollisions();
-
 }
 
 ball.style.left=x+"px";
 ball.style.top=y+"px";
-
 }
 
 requestAnimationFrame(moveBall);
-
 }
 
-/* =========================
+/* =========================================================
    HUD
-========================= */
+========================================================= */
 
 function updateHUD(){
 
@@ -3651,43 +3764,44 @@ if(
 isBallFastEnoughForImmunity()
 ){
 
-speedDisplay.style.color="#00ff66";
+speedDisplay.style.color="#39ff14";
 
 }else{
 
 speedDisplay.style.color="#ff4444";
-
 }
 
-if(toughnessDebuffActive){
+if(health<=30){
 
-toughnessDisplay.style.color="#c000ff";
+healthFill.style.background="#ff2222";
 
 }else{
 
-toughnessDisplay.style.color="";
-
+healthFill.style.background="#39ff14";
+}
 }
 
-}
-
-/* =========================
-   GAME OVER / WIN
-========================= */
+/* =========================================================
+   GAME OVER
+========================================================= */
 
 function gameOver(){
 
 running=false;
 
+bombActive=false;
+
+bombCountdown.style.display="none";
+bombWarning.style.display="none";
+
 finalScore.textContent=
-"Wave "+wave+
-" • Score "+score;
+"WAVE "+wave+
+" // SCORE "+score;
 
 gameOverScreen.querySelector("h1").textContent=
-"GAME OVER";
+"SYSTEM FAILURE";
 
 gameOverScreen.style.display="flex";
-
 }
 
 function gameWin(){
@@ -3698,18 +3812,17 @@ bossBar.style.display="none";
 bossName.style.display="none";
 
 finalScore.textContent=
-"YOU DEFEATED THE ULTIMATE VIRUS! • SCORE "+score;
+"ULTIMATE VIRUS DESTROYED // SCORE "+score;
 
 gameOverScreen.querySelector("h1").textContent=
-"YOU WIN!";
+"SYSTEM CLEARED";
 
 gameOverScreen.style.display="flex";
-
 }
 
-/* =========================
+/* =========================================================
    RESET
-========================= */
+========================================================= */
 
 function resetGame(){
 
@@ -3731,10 +3844,6 @@ speedY=START_SPEED_Y;
 
 health=100;
 toughness=1;
-normalToughness=1;
-
-toughnessDebuffActive=false;
-toughnessDebuffTimer=0;
 
 wave=0;
 score=0;
@@ -3758,14 +3867,14 @@ slowFieldTimer=0;
 playerSlowFactor=1;
 playerSlowTimer=0;
 
+purpleToughnessActive=false;
+purpleToughnessTimer=0;
+
+purpleStatus.style.display="none";
+
 bombActive=false;
 bombTimer=0;
-bombX=0;
-bombY=0;
-activeBombEnemy=null;
-
-slowOverlay.style.display="none";
-toughnessOverlay.style.display="none";
+bombEnemy=null;
 
 bombCountdown.style.display="none";
 bombWarning.style.display="none";
@@ -3785,17 +3894,15 @@ bossBar.style.display="none";
 bossName.style.display="none";
 
 gameOverScreen.querySelector("h1").textContent=
-"GAME OVER";
+"SYSTEM FAILURE";
 
 for(const type in inventoryCounts){
 
 inventoryCounts[type]=0;
-
 }
 
 renderInventory();
 updateHUD();
-
 }
 
 function startGame(){
@@ -3808,12 +3915,11 @@ startScreen.style.display="none";
 gameOverScreen.style.display="none";
 
 startWave();
-
 }
 
-/* =========================
+/* =========================================================
    CONTROLS
-========================= */
+========================================================= */
 
 document.addEventListener(
 "keydown",
@@ -3834,9 +3940,7 @@ trashVisible?
 if(!trashVisible){
 
 inventory.style.display="none";
-
 }
-
 }
 
 if(key==="e"){
@@ -3851,15 +3955,12 @@ eraserMode?
 dragging=false;
 
 blockPreview.style.display="none";
-
 }
 
 if(event.key==="Escape"){
 
 inventory.style.display="none";
-
 }
-
 }
 );
 
@@ -3875,9 +3976,10 @@ inventory.style.display==="block"
 "block";
 
 renderInventory();
-
 }
 );
+
+/* Mouse */
 
 document.addEventListener(
 "mousedown",
@@ -3890,10 +3992,10 @@ event=>{
 
 mouseX=event.clientX;
 mouseY=event.clientY;
+
 mouseInside=true;
 
 dragBlock(event);
-
 }
 );
 
@@ -3909,9 +4011,7 @@ mouseInside=false;
 }
 );
 
-/* =========================
-   TOUCH
-========================= */
+/* Touch */
 
 document.addEventListener(
 "touchstart",
@@ -3929,7 +4029,6 @@ clientY:touch.clientY,
 target:document.body
 
 });
-
 },
 {passive:false}
 );
@@ -3951,7 +4050,6 @@ clientX:touch.clientX,
 clientY:touch.clientY
 
 });
-
 },
 {passive:false}
 );
@@ -3975,9 +4073,9 @@ document
 startGame
 );
 
-/* =========================
+/* =========================================================
    RESIZE
-========================= */
+========================================================= */
 
 let oldWidth=innerWidth;
 let oldHeight=innerHeight;
@@ -4006,20 +4104,16 @@ widthChange<0 &&
 x>maxX
 ){
 
-const impact=
-Math.abs(widthChange);
-
 x=maxX;
 
 speedX=
 -Math.abs(speedX)-
 Math.min(
 15,
-impact*.45
+Math.abs(widthChange)*.45
 );
 
 limitSpeed();
-
 }
 
 if(
@@ -4027,20 +4121,16 @@ heightChange<0 &&
 y>maxY
 ){
 
-const impact=
-Math.abs(heightChange);
-
 y=maxY;
 
 speedY=
 -Math.abs(speedY)-
 Math.min(
 15,
-impact*.45
+Math.abs(heightChange)*.45
 );
 
 limitSpeed();
-
 }
 
 x=Math.max(
@@ -4055,13 +4145,12 @@ Math.min(y,maxY)
 
 oldWidth=newWidth;
 oldHeight=newHeight;
-
 }
 );
 
-/* =========================
+/* =========================================================
    MAIN LOOP
-========================= */
+========================================================= */
 
 function gameLoop(){
 
@@ -4071,18 +4160,18 @@ updateEnemies();
 updateLoot();
 updateShield();
 checkShieldCollision();
+
 updatePowerups();
+
 updatePlayerSlow();
-updateToughnessDebuff();
+updatePurpleToughness();
 updateTimeBomb();
 
 updateBossBar();
 updateHUD();
-
 }
 
 requestAnimationFrame(gameLoop);
-
 }
 
 ball.style.left=x+"px";
