@@ -1,0 +1,3950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Energy Ball Survival</title>
+
+<style>
+html,body{
+margin:0;
+width:100%;
+height:100%;
+overflow:hidden;
+background:#111;
+user-select:none;
+font-family:Arial,sans-serif
+}
+
+#ball{
+position:absolute;
+width:40px;
+height:40px;
+border-radius:50%;
+background:#a020f0;
+box-shadow:0 0 25px #a020f0,0 0 55px #7b00ff;
+z-index:20;
+pointer-events:none;
+transition:filter .15s
+}
+
+#ball.powerFlash{
+animation:ballPowerFlash .6s ease-out
+}
+
+@keyframes ballPowerFlash{
+0%{transform:scale(1);filter:brightness(1)}
+30%{transform:scale(1.65);filter:brightness(3)}
+100%{transform:scale(1);filter:brightness(1)}
+}
+
+.block{
+position:absolute;
+background:#fff;
+box-shadow:0 0 12px rgba(255,255,255,.8);
+z-index:5;
+pointer-events:none;
+border-radius:2px
+}
+
+.block.damaged{
+background:#aaa;
+box-shadow:0 0 10px rgba(255,255,255,.35)
+}
+
+#blockPreview{
+position:absolute;
+background:rgba(255,255,255,.3);
+border:2px dashed #fff;
+box-sizing:border-box;
+pointer-events:none;
+z-index:30;
+display:none
+}
+
+.enemy{
+position:absolute;
+width:18px;
+height:18px;
+border-radius:50%;
+background:#f22;
+box-shadow:0 0 8px #f00,0 0 20px #f00;
+z-index:12;
+pointer-events:none;
+animation:pulse .55s infinite alternate
+}
+
+.enemy.green{
+background:#28ff72;
+box-shadow:0 0 8px #00ff55,0 0 22px #00ff55;
+}
+
+.enemy.boss{
+width:55px;
+height:55px;
+background:#8b00ff;
+box-shadow:
+0 0 15px #f00,
+0 0 35px #9000ff,
+0 0 70px #ff0000;
+animation:bossPulse .45s infinite alternate;
+}
+
+.enemy.bomb{
+width:25px;
+height:25px;
+background:#ff9d00;
+box-shadow:
+0 0 10px #ffb300,
+0 0 25px #ff5e00,
+0 0 45px #f00;
+animation:bombPulse .35s infinite alternate
+}
+
+.enemy.popupEnemy{
+background:#00bfff;
+box-shadow:
+0 0 10px #00eaff,
+0 0 25px #008cff;
+animation:popupEnemyPulse .5s infinite alternate
+}
+
+.enemy.burrowing{
+box-shadow:
+0 0 8px #ff0000,
+0 0 20px #ff0000,
+0 0 35px rgba(255,0,0,.8)
+}
+
+.enemy.green.burrowing{
+box-shadow:
+0 0 8px #00ff55,
+0 0 25px #00ff55,
+0 0 40px rgba(0,255,80,.8)
+}
+
+.enemy::after{
+content:"";
+position:absolute;
+inset:-5px;
+border:2px solid rgba(255,0,0,.25);
+border-radius:50%;
+animation:tunnelPulse .35s infinite alternate
+}
+
+.enemy.green::after{
+border-color:rgba(0,255,80,.35)
+}
+
+.enemy.bomb::after{
+border-color:rgba(255,180,0,.7);
+inset:-8px
+}
+
+.enemy.popupEnemy::after{
+border-color:rgba(0,220,255,.65);
+inset:-7px
+}
+
+.boss::after{
+inset:-10px;
+border-color:rgba(255,0,255,.6);
+border-width:3px;
+}
+
+@keyframes pulse{
+from{transform:scale(.72);opacity:.65}
+to{transform:scale(1.3);opacity:1}
+}
+
+@keyframes bossPulse{
+from{transform:scale(.85);opacity:.8}
+to{transform:scale(1.12);opacity:1}
+}
+
+@keyframes tunnelPulse{
+from{transform:scale(.75);opacity:.2}
+to{transform:scale(1.3);opacity:.8}
+}
+
+@keyframes bombPulse{
+from{transform:scale(.7);filter:brightness(1)}
+to{transform:scale(1.25);filter:brightness(2)}
+}
+
+@keyframes popupEnemyPulse{
+from{transform:scale(.75) rotate(0deg)}
+to{transform:scale(1.25) rotate(180deg)}
+}
+
+/* =========================
+   BOMB FIRE
+========================= */
+
+.bombFire{
+position:fixed;
+width:500px;
+height:500px;
+border-radius:50%;
+transform:translate(-50%,-50%);
+z-index:11;
+pointer-events:none;
+background:
+radial-gradient(
+circle,
+rgba(255,255,180,.95) 0%,
+rgba(255,180,0,.8) 18%,
+rgba(255,70,0,.6) 42%,
+rgba(255,0,0,.28) 65%,
+rgba(255,0,0,0) 100%
+);
+box-shadow:
+0 0 30px #ffb300,
+0 0 70px #ff5e00,
+0 0 130px #ff0000;
+animation:bombFirePulse .3s infinite alternate;
+}
+
+.bombFire::after{
+content:"";
+position:absolute;
+inset:35px;
+border:5px solid rgba(255,230,100,.8);
+border-radius:50%;
+animation:fireRing .5s infinite alternate;
+}
+
+@keyframes bombFirePulse{
+from{
+transform:translate(-50%,-50%) scale(.92);
+opacity:.75
+}
+to{
+transform:translate(-50%,-50%) scale(1.08);
+opacity:1
+}
+}
+
+@keyframes fireRing{
+from{
+transform:scale(.85);
+opacity:.3
+}
+to{
+transform:scale(1.08);
+opacity:.9
+}
+}
+
+/* =========================
+   BOSS
+========================= */
+
+#bossBar{
+position:fixed;
+left:50%;
+top:15px;
+transform:translateX(-50%);
+width:500px;
+height:22px;
+background:#210021;
+border:2px solid #a000ff;
+border-radius:15px;
+z-index:250;
+display:none;
+overflow:hidden;
+box-shadow:0 0 20px #9000ff
+}
+
+#bossFill{
+height:100%;
+width:100%;
+background:linear-gradient(90deg,#ff0000,#b000ff);
+transition:width .15s
+}
+
+#bossName{
+position:fixed;
+left:50%;
+top:42px;
+transform:translateX(-50%);
+color:#fff;
+font-size:15px;
+font-weight:bold;
+z-index:251;
+display:none;
+text-shadow:0 0 10px #f00
+}
+
+/* =========================
+   SHIELD
+========================= */
+
+#shield{
+position:absolute;
+width:58px;
+height:78px;
+display:none;
+z-index:21;
+pointer-events:none;
+box-sizing:border-box;
+background:linear-gradient(
+135deg,
+rgba(90,230,255,.95),
+rgba(0,100,255,.65)
+);
+border:4px solid #42ddff;
+clip-path:polygon(
+50% 0%,
+92% 18%,
+88% 60%,
+73% 82%,
+50% 100%,
+27% 82%,
+12% 60%,
+8% 18%
+);
+filter:
+drop-shadow(0 0 5px #36dcff)
+drop-shadow(0 0 14px #008cff)
+drop-shadow(0 0 28px rgba(0,180,255,.8));
+transform-origin:center;
+}
+
+#shield::before{
+content:"";
+position:absolute;
+left:50%;
+top:10%;
+width:4px;
+height:72%;
+transform:translateX(-50%);
+background:rgba(255,255,255,.75);
+box-shadow:0 0 8px white
+}
+
+#shield::after{
+content:"";
+position:absolute;
+left:19%;
+top:45%;
+width:62%;
+height:4px;
+background:rgba(255,255,255,.65);
+box-shadow:0 0 8px white
+}
+
+#shield.powerupActive{
+animation:shieldPower .8s ease-out
+}
+
+@keyframes shieldPower{
+0%{filter:brightness(1)}
+25%{filter:brightness(3)}
+100%{filter:brightness(1)}
+}
+
+/* =========================
+   LOOT
+========================= */
+
+.loot{
+position:absolute;
+width:30px;
+height:30px;
+display:flex;
+justify-content:center;
+align-items:center;
+border-radius:8px;
+background:#17171d;
+border:2px solid #aaa;
+z-index:15;
+animation:lootFloat .7s infinite alternate;
+pointer-events:none;
+font-size:20px
+}
+
+.loot::after{
+content:"";
+position:absolute;
+inset:-5px;
+border-radius:12px;
+border:2px solid rgba(255,255,255,.25);
+animation:lootRing 1s infinite linear
+}
+
+@keyframes lootFloat{
+from{transform:translateY(-2px) scale(.95)}
+to{transform:translateY(4px) scale(1.08)}
+}
+
+@keyframes lootRing{
+from{transform:scale(.7);opacity:.8}
+to{transform:scale(1.5);opacity:0}
+}
+
+/* =========================
+   POWERUP ANIMATION
+========================= */
+
+.powerupAnimation{
+position:fixed;
+left:50%;
+top:50%;
+transform:translate(-50%,-50%);
+z-index:450;
+pointer-events:none;
+font-size:80px;
+animation:powerupPop 1.1s ease-out forwards;
+text-shadow:0 0 15px currentColor,0 0 45px currentColor
+}
+
+@keyframes powerupPop{
+0%{
+opacity:0;
+transform:translate(-50%,-50%) scale(.2) rotate(-30deg)
+}
+20%{
+opacity:1;
+transform:translate(-50%,-50%) scale(1.5) rotate(10deg)
+}
+55%{
+opacity:1;
+transform:translate(-50%,-50%) scale(1) rotate(0deg)
+}
+100%{
+opacity:0;
+transform:translate(-50%,-50%) scale(2.2) rotate(20deg)
+}
+}
+
+.powerupLabel{
+position:fixed;
+left:50%;
+top:58%;
+transform:translateX(-50%);
+z-index:451;
+pointer-events:none;
+color:#fff;
+font-size:22px;
+font-weight:bold;
+text-shadow:0 0 10px currentColor,0 0 25px currentColor;
+animation:powerupLabel 1.1s ease-out forwards
+}
+
+@keyframes powerupLabel{
+0%{opacity:0;transform:translate(-50%,20px)}
+20%{opacity:1;transform:translate(-50%,0)}
+75%{opacity:1}
+100%{opacity:0;transform:translate(-50%,-25px)}
+}
+
+.powerRing{
+position:fixed;
+left:50%;
+top:50%;
+width:30px;
+height:30px;
+border:5px solid white;
+border-radius:50%;
+z-index:449;
+pointer-events:none;
+animation:powerRing 1s ease-out forwards
+}
+
+@keyframes powerRing{
+from{
+opacity:1;
+width:30px;
+height:30px;
+margin-left:-20px;
+margin-top:-20px
+}
+to{
+opacity:0;
+width:700px;
+height:700px;
+margin-left:-355px;
+margin-top:-355px
+}
+}
+
+/* =========================
+   HUD
+========================= */
+
+#hud{
+position:fixed;
+top:12px;
+left:12px;
+color:#fff;
+z-index:100;
+font-size:14px
+}
+
+.hudBox{
+background:rgba(0,0,0,.78);
+border:1px solid #444;
+border-radius:8px;
+padding:8px 12px;
+margin-bottom:7px
+}
+
+#healthBar{
+width:190px;
+height:10px;
+background:#400;
+border-radius:10px;
+margin-top:5px;
+overflow:hidden
+}
+
+#healthFill{
+height:100%;
+width:100%;
+background:#f33;
+transition:width .15s
+}
+
+#controls{
+position:fixed;
+top:12px;
+right:12px;
+color:#888;
+text-align:right;
+z-index:100;
+font-size:12px
+}
+
+/* =========================
+   INVENTORY
+========================= */
+
+#trashButton{
+position:fixed;
+right:18px;
+bottom:18px;
+width:65px;
+height:65px;
+border:2px solid #666;
+border-radius:14px;
+background:#17171c;
+color:white;
+font-size:31px;
+display:none;
+align-items:center;
+justify-content:center;
+z-index:200;
+cursor:pointer
+}
+
+#inventory{
+position:fixed;
+right:18px;
+bottom:95px;
+width:350px;
+max-height:470px;
+box-sizing:border-box;
+padding:14px;
+background:rgba(8,8,12,.97);
+border:2px solid #444;
+border-radius:13px;
+color:#fff;
+display:none;
+z-index:199
+}
+
+#inventory h2{
+margin:0 0 12px
+}
+
+#items{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:8px;
+max-height:370px;
+overflow:auto
+}
+
+.item{
+min-height:90px;
+border:1px solid #444;
+background:#15151b;
+border-radius:9px;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+cursor:pointer;
+transition:.15s
+}
+
+.item:hover{
+background:#292930;
+transform:scale(1.03)
+}
+
+.itemIcon{
+font-size:30px
+}
+
+.itemName{
+font-size:12px;
+margin-top:4px;
+text-align:center
+}
+
+.itemCount{
+color:#888;
+font-size:11px;
+margin-top:3px
+}
+
+#eraser{
+position:fixed;
+left:50%;
+bottom:18px;
+transform:translateX(-50%);
+background:#17171c;
+border:1px solid #aaa;
+border-radius:8px;
+padding:9px 15px;
+color:#fff;
+display:none;
+z-index:200
+}
+
+/* =========================
+   WAVE / FLASH
+========================= */
+
+#waveText{
+position:fixed;
+left:50%;
+top:42%;
+transform:translate(-50%,-50%);
+color:#fff;
+font-size:55px;
+font-weight:bold;
+opacity:0;
+pointer-events:none;
+z-index:300;
+text-shadow:0 0 15px #fff,0 0 35px #fff
+}
+
+#speedFlash{
+position:fixed;
+left:50%;
+bottom:75px;
+transform:translateX(-50%);
+color:#fff;
+font-size:18px;
+font-weight:bold;
+opacity:0;
+pointer-events:none;
+z-index:300
+}
+
+#slowOverlay{
+position:fixed;
+inset:0;
+background:rgba(0,255,80,.055);
+pointer-events:none;
+z-index:350;
+display:none;
+}
+
+/* =========================
+   TIME BOMB COUNTDOWN
+========================= */
+
+#bombCountdown{
+position:fixed;
+left:50%;
+top:85px;
+transform:translateX(-50%);
+color:#ff7b00;
+font-size:25px;
+font-weight:bold;
+text-shadow:
+0 0 8px #ff5e00,
+0 0 20px #f00;
+z-index:400;
+display:none;
+pointer-events:none;
+animation:countdownPulse .5s infinite alternate
+}
+
+@keyframes countdownPulse{
+from{transform:translateX(-50%) scale(.9)}
+to{transform:translateX(-50%) scale(1.1)}
+}
+
+#bombWarning{
+position:fixed;
+left:50%;
+top:120px;
+transform:translateX(-50%);
+color:#ff3b00;
+font-size:14px;
+font-weight:bold;
+z-index:400;
+display:none;
+pointer-events:none;
+animation:warningFlash .4s infinite alternate
+}
+
+@keyframes warningFlash{
+from{opacity:.4}
+to{opacity:1}
+}
+
+/* =========================
+   FAKE MALWARE POPUPS
+========================= */
+
+#malwarePopups{
+position:fixed;
+inset:0;
+z-index:1000;
+pointer-events:none
+}
+
+.malwarePopup{
+position:absolute;
+width:300px;
+background:#f1f1f1;
+color:#111;
+border:2px solid #777;
+box-shadow:
+0 0 15px rgba(255,0,0,.8),
+0 0 40px rgba(255,0,0,.35);
+font-family:Arial,sans-serif;
+pointer-events:auto;
+animation:popupAppear .25s ease-out;
+user-select:none
+}
+
+@keyframes popupAppear{
+from{
+opacity:0;
+transform:scale(.3) rotate(-8deg)
+}
+to{
+opacity:1;
+transform:scale(1) rotate(0)
+}
+}
+
+.malwareTitle{
+height:28px;
+background:#0754a5;
+color:white;
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:0 5px 0 8px;
+box-sizing:border-box;
+font-size:13px;
+font-weight:bold
+}
+
+.malwareClose{
+width:22px;
+height:21px;
+padding:0;
+margin:0;
+border:0;
+border-radius:0;
+background:#c00;
+color:white;
+font-size:15px;
+font-weight:bold;
+line-height:18px;
+cursor:pointer
+}
+
+.malwareClose:hover{
+background:#f00;
+color:white
+}
+
+.malwareBody{
+padding:18px;
+text-align:center
+}
+
+.malwareWarning{
+font-size:38px;
+margin-bottom:7px
+}
+
+.malwareBody h3{
+margin:4px 0;
+color:#d00;
+font-size:21px
+}
+
+.malwareBody p{
+font-size:13px;
+line-height:1.35
+}
+
+.malwareFakeButton{
+display:inline-block;
+margin-top:8px;
+padding:7px 14px;
+background:#d00;
+color:white;
+font-weight:bold;
+font-size:12px;
+border-radius:3px
+}
+
+/* =========================
+   START / GAME OVER
+========================= */
+
+#startScreen,
+#gameOver{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.94);
+z-index:500;
+color:#fff;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+text-align:center
+}
+
+#gameOver{
+display:none
+}
+
+#startScreen h1,
+#gameOver h1{
+font-size:50px;
+margin:0 0 15px
+}
+
+#startScreen p{
+color:#aaa;
+line-height:1.6;
+max-width:700px
+}
+
+button{
+padding:12px 30px;
+background:transparent;
+color:#fff;
+border:2px solid #fff;
+border-radius:8px;
+cursor:pointer;
+font-size:18px
+}
+
+button:hover{
+background:#fff;
+color:#000
+}
+</style>
+</head>
+
+<body>
+
+<div id="ball"></div>
+<div id="shield"></div>
+<div id="blockPreview"></div>
+<div id="slowOverlay"></div>
+
+<div id="bossBar">
+<div id="bossFill"></div>
+</div>
+
+<div id="bossName">THE ULTIMATE VIRUS</div>
+
+<div id="bombCountdown">TIME BOMB: 5</div>
+<div id="bombWarning">⚠ TIME BOMB ARMED ⚠</div>
+
+<div id="malwarePopups"></div>
+
+<div id="hud">
+
+<div class="hudBox">
+Wave: <b id="wave">0</b><br>
+Enemies: <b id="enemyCount">0</b><br>
+Score: <b id="score">0</b>
+</div>
+
+<div class="hudBox">
+Health
+<div id="healthBar">
+<div id="healthFill"></div>
+</div>
+</div>
+
+<div class="hudBox">
+Speed: <b id="speed">1.00x</b><br>
+Toughness: <b id="toughness">1.00x</b>
+</div>
+
+</div>
+
+<div id="controls">
+T = Trash / Inventory<br>
+E = Eraser Mode<br>
+Double-click loot = Activate
+</div>
+
+<div id="eraser">
+ERASER MODE — Press E again to turn off
+</div>
+
+<div id="waveText"></div>
+<div id="speedFlash"></div>
+
+<div id="trashButton">🗑️</div>
+
+<div id="inventory">
+<h2>Loot Inventory</h2>
+<div id="items"></div>
+</div>
+
+<div id="startScreen">
+
+<h1>ENERGY BALL</h1>
+
+<p>
+Drag your mouse to create defenses.<br>
+Enemies physically burrow through your defenses and damage
+the blocks while tunneling.<br><br>
+
+You must be moving <b>10x the original speed</b> to become
+immune to enemy contact damage and destroy enemies by impact.<br><br>
+
+Green viruses slow the player to <b>0.5x original speed</b>
+for 5 seconds.<br>
+The first wave contains a dangerous Time Bomb.<br>
+Some viruses can trigger fake malware popup attacks.<br>
+Wave 20 contains the Ultimate Virus.
+</p>
+
+<button id="startButton">START</button>
+
+</div>
+
+<div id="gameOver">
+
+<h1>GAME OVER</h1>
+<p id="finalScore"></p>
+<button id="restartButton">RESTART</button>
+
+</div>
+
+<script>
+
+const ball=document.getElementById("ball");
+const shield=document.getElementById("shield");
+const blockPreview=document.getElementById("blockPreview");
+
+const waveDisplay=document.getElementById("wave");
+const enemyCountDisplay=document.getElementById("enemyCount");
+const scoreDisplay=document.getElementById("score");
+
+const healthFill=document.getElementById("healthFill");
+
+const speedDisplay=document.getElementById("speed");
+const toughnessDisplay=document.getElementById("toughness");
+
+const trashButton=document.getElementById("trashButton");
+const inventory=document.getElementById("inventory");
+const itemsPanel=document.getElementById("items");
+
+const eraser=document.getElementById("eraser");
+
+const waveText=document.getElementById("waveText");
+const speedFlash=document.getElementById("speedFlash");
+
+const startScreen=document.getElementById("startScreen");
+const gameOverScreen=document.getElementById("gameOver");
+const finalScore=document.getElementById("finalScore");
+
+const bossBar=document.getElementById("bossBar");
+const bossFill=document.getElementById("bossFill");
+const bossName=document.getElementById("bossName");
+const slowOverlay=document.getElementById("slowOverlay");
+
+const bombCountdown=document.getElementById("bombCountdown");
+const bombWarning=document.getElementById("bombWarning");
+
+const malwarePopups=document.getElementById("malwarePopups");
+
+const BALL_SIZE=40;
+const BALL_RADIUS=20;
+
+const START_SPEED_X=5;
+const START_SPEED_Y=4;
+
+const ORIGINAL_SPEED=Math.hypot(
+START_SPEED_X,
+START_SPEED_Y
+);
+
+const MAX_SPEED=100;
+
+let x=(innerWidth-BALL_SIZE)/2;
+let y=(innerHeight-BALL_SIZE)/2;
+
+let speedX=START_SPEED_X;
+let speedY=START_SPEED_Y;
+
+let running=false;
+
+let health=100;
+let maxHealth=100;
+
+let toughness=1;
+
+let wave=0;
+let score=0;
+
+let enemies=[];
+let blocks=[];
+let loot=[];
+
+let waveSpawning=false;
+let waveTransition=false;
+let bossAlive=false;
+
+let shieldActive=false;
+let shieldAngle=0;
+let shieldTimer=0;
+
+let eraserMode=false;
+let trashVisible=false;
+
+let dragging=false;
+
+let dragStartX=0;
+let dragStartY=0;
+let dragCurrentX=0;
+let dragCurrentY=0;
+
+let mouseX=-1000;
+let mouseY=-1000;
+let mouseInside=false;
+
+let magnetActive=false;
+let magnetTimer=0;
+
+let phaseShieldActive=false;
+let phaseShieldTimer=0;
+
+let damageBoost=1;
+let damageBoostTimer=0;
+
+let slowFieldActive=false;
+let slowFieldTimer=0;
+
+/* =========================
+   GREEN SPEED VIRUS
+========================= */
+
+let playerSlowFactor=1;
+let playerSlowTimer=0;
+
+/* Store the speed before the virus slows us */
+let savedSpeedX=START_SPEED_X;
+let savedSpeedY=START_SPEED_Y;
+
+/* =========================
+   TIME BOMB
+========================= */
+
+let bombActive=false;
+let bombTimer=0;
+let bombX=0;
+let bombY=0;
+let bombEnemy=null;
+
+const BOMB_SECONDS=5;
+const BOMB_FIRE_RADIUS=250;
+
+/* =========================
+   INVENTORY
+========================= */
+
+const inventoryItems={
+
+shieldPlug:{
+name:"Shield Plug",
+icon:"🛡️"
+},
+
+toughnessChip:{
+name:"Toughness Chip",
+icon:"🔩"
+},
+
+repairCore:{
+name:"Repair Core",
+icon:"❤️"
+},
+
+speedCore:{
+name:"Speed Core",
+icon:"⚡"
+},
+
+blastCore:{
+name:"Blast Core",
+icon:"💥"
+},
+
+magnetCore:{
+name:"Magnet Core",
+icon:"🧲"
+},
+
+phaseCore:{
+name:"Phase Shield",
+icon:"🔷"
+},
+
+powerCore:{
+name:"Power Core",
+icon:"🔥"
+},
+
+slowCore:{
+name:"Time Core",
+icon:"⏱️"
+}
+
+};
+
+const inventoryCounts={};
+
+for(const type in inventoryItems){
+inventoryCounts[type]=0;
+}
+
+/* =========================
+   BASIC HELPERS
+========================= */
+
+function getSpeed(){
+return Math.hypot(speedX,speedY);
+}
+
+function setSpeedMagnitude(newSpeed){
+
+const current=getSpeed();
+
+if(current<=0){
+
+speedX=newSpeed;
+speedY=0;
+
+return;
+
+}
+
+const multiplier=newSpeed/current;
+
+speedX*=multiplier;
+speedY*=multiplier;
+
+}
+
+function limitSpeed(){
+
+const current=getSpeed();
+
+if(current>MAX_SPEED){
+
+const multiplier=MAX_SPEED/current;
+
+speedX*=multiplier;
+speedY*=multiplier;
+
+}
+
+}
+
+function isBallFastEnoughForImmunity(){
+
+return getSpeed()>=ORIGINAL_SPEED*10;
+}
+
+function showSpeedFlash(text){
+
+speedFlash.textContent=text;
+speedFlash.style.opacity="1";
+
+clearTimeout(showSpeedFlash.timer);
+
+showSpeedFlash.timer=setTimeout(()=>{
+speedFlash.style.opacity="0";
+},900);
+
+}
+
+function powerupAnimation(icon,name){
+
+const iconElement=document.createElement("div");
+
+iconElement.className="powerupAnimation";
+iconElement.textContent=icon;
+
+document.body.appendChild(iconElement);
+
+const label=document.createElement("div");
+
+label.className="powerupLabel";
+label.textContent=name;
+
+document.body.appendChild(label);
+
+const ring=document.createElement("div");
+
+ring.className="powerRing";
+
+document.body.appendChild(ring);
+
+ball.classList.remove("powerFlash");
+
+void ball.offsetWidth;
+
+ball.classList.add("powerFlash");
+
+setTimeout(()=>{
+iconElement.remove();
+label.remove();
+ring.remove();
+},1200);
+
+}
+
+/* =========================
+   BLOCKS
+========================= */
+
+function startBlock(event){
+
+if(!running)return;
+
+if(eraserMode){
+
+eraseAt(event.clientX,event.clientY);
+return;
+
+}
+
+if(event.target!==document.body)return;
+
+dragging=true;
+
+dragStartX=event.clientX;
+dragStartY=event.clientY;
+
+dragCurrentX=dragStartX;
+dragCurrentY=dragStartY;
+
+blockPreview.style.display="block";
+
+updateBlockPreview();
+
+}
+
+function dragBlock(event){
+
+if(!dragging)return;
+
+dragCurrentX=event.clientX;
+dragCurrentY=event.clientY;
+
+updateBlockPreview();
+
+}
+
+function finishBlock(){
+
+if(!dragging)return;
+
+dragging=false;
+
+const rect=getDragRectangle();
+
+blockPreview.style.display="none";
+
+if(rect.width<5||rect.height<5)return;
+
+createBlock(
+rect.left,
+rect.top,
+rect.width,
+rect.height
+);
+
+}
+
+function getDragRectangle(){
+
+return{
+left:Math.min(dragStartX,dragCurrentX),
+top:Math.min(dragStartY,dragCurrentY),
+width:Math.abs(dragCurrentX-dragStartX),
+height:Math.abs(dragCurrentY-dragStartY)
+};
+
+}
+
+function updateBlockPreview(){
+
+const rect=getDragRectangle();
+
+blockPreview.style.left=rect.left+"px";
+blockPreview.style.top=rect.top+"px";
+blockPreview.style.width=rect.width+"px";
+blockPreview.style.height=rect.height+"px";
+
+}
+
+function createBlock(left,top,width,height){
+
+const element=document.createElement("div");
+
+element.className="block";
+
+element.style.left=left+"px";
+element.style.top=top+"px";
+element.style.width=width+"px";
+element.style.height=height+"px";
+
+document.body.appendChild(element);
+
+const maxHp=Math.max(
+80,
+width*height*.035
+);
+
+blocks.push({
+left,
+top,
+width,
+height,
+hp:maxHp,
+maxHp,
+element
+});
+
+}
+
+function eraseAt(mx,my){
+
+for(let i=blocks.length-1;i>=0;i--){
+
+const block=blocks[i];
+
+if(
+mx>=block.left &&
+mx<=block.left+block.width &&
+my>=block.top &&
+my<=block.top+block.height
+){
+
+block.element.remove();
+blocks.splice(i,1);
+return;
+
+}
+
+}
+
+}
+
+function checkBlockCollisions(){
+
+const centerX=x+BALL_RADIUS;
+const centerY=y+BALL_RADIUS;
+
+for(const block of blocks){
+
+const left=block.left;
+const right=block.left+block.width;
+
+const top=block.top;
+const bottom=block.top+block.height;
+
+const closestX=Math.max(left,Math.min(centerX,right));
+const closestY=Math.max(top,Math.min(centerY,bottom));
+
+const dx=centerX-closestX;
+const dy=centerY-closestY;
+
+const distance=Math.hypot(dx,dy);
+
+if(distance>BALL_RADIUS)continue;
+
+let normalX;
+let normalY;
+
+if(distance>0){
+
+normalX=dx/distance;
+normalY=dy/distance;
+
+}else{
+
+const dl=centerX-left;
+const dr=right-centerX;
+const dt=centerY-top;
+const db=bottom-centerY;
+
+const smallest=Math.min(dl,dr,dt,db);
+
+if(smallest===dl){
+normalX=-1;
+normalY=0;
+}else if(smallest===dr){
+normalX=1;
+normalY=0;
+}else if(smallest===dt){
+normalX=0;
+normalY=-1;
+}else{
+normalX=0;
+normalY=1;
+}
+
+}
+
+const overlap=BALL_RADIUS-distance;
+
+x+=normalX*overlap;
+y+=normalY*overlap;
+
+kineticDefenseBounce(normalX,normalY);
+
+}
+
+}
+
+function checkCursorCollision(){
+
+if(!mouseInside)return;
+
+const centerX=x+BALL_RADIUS;
+const centerY=y+BALL_RADIUS;
+
+const left=mouseX;
+const right=mouseX+18;
+const top=mouseY;
+const bottom=mouseY+24;
+
+const closestX=Math.max(left,Math.min(centerX,right));
+const closestY=Math.max(top,Math.min(centerY,bottom));
+
+const dx=centerX-closestX;
+const dy=centerY-closestY;
+
+const distance=Math.hypot(dx,dy);
+
+if(distance>=BALL_RADIUS)return;
+
+let normalX;
+let normalY;
+
+if(distance>0){
+
+normalX=dx/distance;
+normalY=dy/distance;
+
+}else{
+
+normalX=1;
+normalY=0;
+
+}
+
+x+=normalX*(BALL_RADIUS-distance);
+y+=normalY*(BALL_RADIUS-distance);
+
+const dot=
+speedX*normalX+
+speedY*normalY;
+
+if(dot<0){
+
+speedX-=2*dot*normalX;
+speedY-=2*dot*normalY;
+
+const boost=
+1+
+Math.min(.6,Math.abs(dot)/90);
+
+speedX*=boost;
+speedY*=boost;
+
+limitSpeed();
+
+}
+
+}
+
+function kineticWindowBounce(normalX,normalY){
+
+const velocityIntoWall=
+speedX*normalX+
+speedY*normalY;
+
+if(velocityIntoWall>=0)return;
+
+const impactSpeed=Math.abs(velocityIntoWall);
+
+speedX-=2*velocityIntoWall*normalX;
+speedY-=2*velocityIntoWall*normalY;
+
+const energyBoost=
+1+
+Math.min(
+.5,
+Math.max(0,impactSpeed-6)/55
+);
+
+speedX*=energyBoost;
+speedY*=energyBoost;
+
+limitSpeed();
+
+if(impactSpeed>8){
+
+showSpeedFlash(
+"KINETIC ENERGY +"+
+(getSpeed()/ORIGINAL_SPEED).toFixed(2)+"x"
+);
+
+}
+
+}
+
+function kineticDefenseBounce(normalX,normalY){
+
+const velocityIntoWall=
+speedX*normalX+
+speedY*normalY;
+
+if(velocityIntoWall>=0)return;
+
+const impact=Math.abs(velocityIntoWall);
+
+speedX-=2*velocityIntoWall*normalX;
+speedY-=2*velocityIntoWall*normalY;
+
+const transfer=
+1+
+Math.min(
+.28,
+Math.max(0,impact-5)/150
+);
+
+speedX*=transfer;
+speedY*=transfer;
+
+limitSpeed();
+
+}
+
+/* =========================
+   ENEMIES
+========================= */
+
+function spawnEnemy(
+type="red",
+forcedX=null,
+forcedY=null
+){
+
+let ex;
+let ey;
+
+if(forcedX!==null){
+
+ex=forcedX;
+ey=forcedY;
+
+}else{
+
+const side=Math.floor(Math.random()*4);
+
+if(side===0){
+ex=Math.random()*innerWidth;
+ey=-40;
+}else if(side===1){
+ex=innerWidth+40;
+ey=Math.random()*innerHeight;
+}else if(side===2){
+ex=Math.random()*innerWidth;
+ey=innerHeight+40;
+}else{
+ex=-40;
+ey=Math.random()*innerHeight;
+}
+
+}
+
+const boss=type==="boss";
+const green=type==="green";
+const bomb=type==="bomb";
+const popupEnemy=type==="popup";
+
+const element=document.createElement("div");
+
+element.className="enemy";
+
+if(green)element.classList.add("green");
+if(boss)element.classList.add("boss");
+if(bomb)element.classList.add("bomb");
+if(popupEnemy)element.classList.add("popupEnemy");
+
+document.body.appendChild(element);
+
+const radius=
+boss?27:
+bomb?12.5:
+9;
+
+const enemy={
+
+x:ex,
+y:ey,
+
+radius,
+
+speed:
+boss?0.65:
+bomb?0:
+green?
+(0.65+wave*.045+Math.random()*.18):
+popupEnemy?
+(0.75+wave*.045+Math.random()*.2):
+(0.82+wave*.055+Math.random()*.25),
+
+tunnelPower:
+boss?3.5:
+green?1.25:
+popupEnemy?1.1:
+1,
+
+damageTimer:0,
+
+element,
+boss,
+green,
+bomb,
+popupEnemy,
+
+burrowing:false,
+burrowBlock:null,
+
+health:
+boss?5000:1,
+
+maxHealth:
+boss?5000:1,
+
+slowOnDeath:green
+
+};
+
+enemies.push(enemy);
+
+/*
+ BOMB:
+ Immediately becomes stationary and starts its
+ 5-second countdown.
+ */
+
+if(bomb){
+
+bombEnemy=enemy;
+
+bombX=enemy.x;
+bombY=enemy.y;
+
+startTimeBomb(enemy);
+
+}
+
+return enemy;
+
+}
+
+/* =========================
+   WAVES
+========================= */
+
+function startWave(){
+
+if(!running)return;
+
+wave++;
+waveSpawning=true;
+waveTransition=false;
+
+showWave(
+wave===20
+?"FINAL WAVE"
+:"WAVE "+wave
+);
+
+if(wave===20){
+
+spawnUltimateBoss();
+
+waveSpawning=false;
+return;
+
+}
+
+const amount=
+4+
+Math.floor(wave*1.7);
+
+const spawnDelay=
+Math.max(
+100,
+300-wave*9
+);
+
+for(let i=0;i<amount;i++){
+
+setTimeout(()=>{
+
+if(!running)return;
+
+let type="red";
+
+if(
+wave>=3 &&
+Math.random()<
+Math.min(.12+wave*.018,.35)
+){
+
+type="green";
+
+}
+
+if(
+wave>=4 &&
+Math.random()<Math.min(.08+wave*.012,.18)
+){
+
+type="popup";
+
+}
+
+spawnEnemy(type);
+
+},i*spawnDelay);
+
+}
+
+/*
+ TIME BOMB IN WAVE 1
+ */
+
+if(wave===1){
+
+setTimeout(()=>{
+
+if(running){
+
+spawnEnemy(
+"bomb",
+innerWidth/2,
+80
+);
+
+showSpeedFlash(
+"⚠ TIME BOMB VIRUS DETECTED!"
+);
+
+}
+
+},500);
+
+}
+
+setTimeout(()=>{
+
+waveSpawning=false;
+
+},amount*spawnDelay+700);
+
+}
+
+function spawnUltimateBoss(){
+
+bossAlive=true;
+
+const boss=spawnEnemy(
+"boss",
+innerWidth/2,
+-80
+);
+
+bossBar.style.display="block";
+bossName.style.display="block";
+
+updateBossBar();
+
+showSpeedFlash(
+"THE ULTIMATE VIRUS HAS ARRIVED!"
+);
+
+let summonCount=0;
+
+const summonInterval=setInterval(()=>{
+
+if(!running||!bossAlive){
+
+clearInterval(summonInterval);
+return;
+
+}
+
+const bossExists=
+enemies.some(e=>e.boss);
+
+if(!bossExists){
+
+clearInterval(summonInterval);
+return;
+
+}
+
+for(
+let i=0;
+i<2+Math.min(4,Math.floor(summonCount/3));
+i++
+){
+
+const angle=
+Math.random()*Math.PI*2;
+
+const bx=innerWidth/2;
+const by=Math.min(innerHeight/2,150);
+
+spawnEnemy(
+Math.random()<.35?
+"green":
+"red",
+bx+Math.cos(angle)*70,
+by+Math.sin(angle)*70
+);
+
+}
+
+summonCount++;
+
+},3500);
+
+}
+
+function checkWaveEnd(){
+
+if(
+!running||
+waveSpawning||
+waveTransition
+)return;
+
+/*
+ Do not advance while the bomb is still active.
+ */
+
+if(bombActive)return;
+
+if(enemies.length!==0)return;
+
+if(wave>=20){
+
+gameWin();
+return;
+
+}
+
+waveTransition=true;
+
+setTimeout(()=>{
+
+if(!running)return;
+
+slowBallBackToOriginal();
+
+startWave();
+
+},1800);
+
+}
+
+function slowBallBackToOriginal(){
+
+const current=getSpeed();
+
+if(current<=ORIGINAL_SPEED)return;
+
+const ratio=ORIGINAL_SPEED/current;
+
+speedX*=ratio;
+speedY*=ratio;
+
+}
+
+/* =========================
+   TIME BOMB
+========================= */
+
+function startTimeBomb(enemy){
+
+/*
+ Only one bomb can be active.
+ */
+
+if(bombActive)return;
+
+bombActive=true;
+
+bombEnemy=enemy;
+
+bombX=enemy.x;
+bombY=enemy.y;
+
+bombTimer=BOMB_SECONDS*60;
+
+bombCountdown.style.display="block";
+bombWarning.style.display="block";
+
+updateBombDisplay();
+
+}
+
+function updateBombDisplay(){
+
+if(!bombActive)return;
+
+const seconds=
+Math.max(
+1,
+Math.ceil(bombTimer/60)
+);
+
+bombCountdown.textContent=
+"TIME BOMB: "+seconds;
+
+}
+
+function updateTimeBomb(){
+
+if(!bombActive)return;
+
+bombTimer--;
+
+updateBombDisplay();
+
+if(bombTimer<=0){
+
+explodeTimeBomb();
+
+}
+
+}
+
+function explodeTimeBomb(){
+
+if(!bombActive)return;
+
+bombActive=false;
+
+bombCountdown.style.display="none";
+bombWarning.style.display="none";
+
+/*
+ Remove the bomb enemy only AFTER it explodes.
+ */
+
+if(
+bombEnemy &&
+enemies.includes(bombEnemy)
+){
+
+bombEnemy.element.remove();
+
+const index=enemies.indexOf(bombEnemy);
+
+if(index>=0){
+enemies.splice(index,1);
+}
+
+}
+
+bombEnemy=null;
+
+/*
+ BIG FIRE EXPLOSION
+ */
+
+createParticles(
+bombX,
+bombY,
+"#ff7b00",
+140
+);
+
+createParticles(
+bombX,
+bombY,
+"#ff0000",
+100
+);
+
+createParticles(
+bombX,
+bombY,
+"#ffff55",
+70
+);
+
+/*
+ Create a visible fire area.
+ */
+
+const fire=document.createElement("div");
+
+fire.className="bombFire";
+
+fire.style.left=bombX+"px";
+fire.style.top=bombY+"px";
+
+document.body.appendChild(fire);
+
+/*
+ The player's CENTER must be inside
+ the fire radius.
+ */
+
+const distance=
+Math.hypot(
+(x+BALL_RADIUS)-bombX,
+(y+BALL_RADIUS)-bombY
+);
+
+if(distance<=BOMB_FIRE_RADIUS){
+
+/*
+ HALF OF ORIGINAL/MAXIMUM HEALTH
+ */
+
+const bombDamage=maxHealth/2;
+
+damageBall(bombDamage);
+
+showSpeedFlash(
+"🔥 TIME BOMB HIT! -50 HP"
+);
+
+}
+
+for(let i=blocks.length-1;i>=0;i--){
+
+const block=blocks[i];
+
+const centerX=
+block.left+
+block.width/2;
+
+const centerY=
+block.top+
+block.height/2;
+
+const d=
+Math.hypot(
+centerX-bombX,
+centerY-bombY
+);
+
+if(d<BOMB_FIRE_RADIUS){
+
+block.hp-=200;
+
+if(block.hp<=0){
+
+block.element.remove();
+blocks.splice(i,1);
+
+}else{
+
+block.element.style.opacity=".25";
+
+}
+
+}
+
+}
+
+showSpeedFlash("💥 TIME BOMB EXPLODED!");
+
+setTimeout(()=>{
+
+fire.remove();
+
+},1800);
+
+}
+
+/* =========================
+   WAVE TEXT
+========================= */
+
+function showWave(text){
+
+waveText.textContent=text;
+waveText.style.opacity="1";
+
+setTimeout(()=>{
+waveText.style.opacity="0";
+},1200);
+
+}
+
+/* =========================
+   TUNNELING
+========================= */
+
+function circleRect(
+cx,cy,radius,rx,ry,rw,rh
+){
+
+const closestX=
+Math.max(rx,Math.min(cx,rx+rw));
+
+const closestY=
+Math.max(ry,Math.min(cy,ry+rh));
+
+const dx=cx-closestX;
+const dy=cy-closestY;
+
+return(
+dx*dx+
+dy*dy
+)<=radius*radius;
+
+}
+
+function findBlockingBlock(enemy,dirX,dirY){
+
+const lookAhead=
+enemy.radius+
+Math.max(5,enemy.speed*2.2);
+
+const testX=enemy.x+dirX*lookAhead;
+const testY=enemy.y+dirY*lookAhead;
+
+for(const block of blocks){
+
+if(
+circleRect(
+testX,
+testY,
+enemy.radius+2,
+block.left,
+block.top,
+block.width,
+block.height
+)
+){
+
+return block;
+
+}
+
+}
+
+return null;
+
+}
+
+function burrowEnemy(enemy,block,dirX,dirY){
+
+enemy.burrowing=true;
+enemy.burrowBlock=block;
+
+enemy.element.classList.add("burrowing");
+
+const tunnelSpeed=
+Math.max(
+.4,
+enemy.speed*.55
+);
+
+enemy.x+=dirX*tunnelSpeed;
+enemy.y+=dirY*tunnelSpeed;
+
+const damage=
+enemy.tunnelPower*
+(
+.9+
+wave*.075
+);
+
+block.hp-=damage;
+
+const hpRatio=
+Math.max(
+0,
+block.hp/block.maxHp
+);
+
+block.element.style.opacity=
+.22+hpRatio*.78;
+
+if(block.hp<=0){
+
+block.element.remove();
+
+const index=blocks.indexOf(block);
+
+if(index>=0)blocks.splice(index,1);
+
+enemy.burrowing=false;
+enemy.burrowBlock=null;
+
+enemy.element.classList.remove("burrowing");
+
+return;
+
+}
+
+const blockCenterX=
+block.left+block.width/2;
+
+const blockCenterY=
+block.top+block.height/2;
+
+const behindX=enemy.x-blockCenterX;
+const behindY=enemy.y-blockCenterY;
+
+const dot=behindX*dirX+behindY*dirY;
+
+if(
+dot>
+Math.max(block.width,block.height)/2+
+enemy.radius
+){
+
+enemy.burrowing=false;
+enemy.burrowBlock=null;
+
+enemy.element.classList.remove("burrowing");
+
+}
+
+}
+
+/* =========================
+   ENEMY UPDATE
+========================= */
+
+function updateEnemies(){
+
+for(let i=enemies.length-1;i>=0;i--){
+
+const enemy=enemies[i];
+
+/*
+ BOMB DOES NOTHING HERE.
+ It stays completely stationary.
+ */
+
+if(enemy.bomb){
+
+enemy.x=bombX;
+enemy.y=bombY;
+
+enemy.element.style.left=
+(enemy.x-enemy.radius)+"px";
+
+enemy.element.style.top=
+(enemy.y-enemy.radius)+"px";
+
+continue;
+
+}
+
+const targetX=x+BALL_RADIUS;
+const targetY=y+BALL_RADIUS;
+
+const dx=targetX-enemy.x;
+const dy=targetY-enemy.y;
+
+const distance=Math.hypot(dx,dy)||1;
+
+const dirX=dx/distance;
+const dirY=dy/distance;
+
+if(
+enemy.burrowing &&
+enemy.burrowBlock
+){
+
+if(blocks.includes(enemy.burrowBlock)){
+
+burrowEnemy(
+enemy,
+enemy.burrowBlock,
+dirX,
+dirY
+);
+
+}else{
+
+enemy.burrowing=false;
+enemy.burrowBlock=null;
+
+enemy.element.classList.remove("burrowing");
+
+}
+
+}else{
+
+const blockingBlock=
+findBlockingBlock(
+enemy,
+dirX,
+dirY
+);
+
+if(blockingBlock){
+
+burrowEnemy(
+enemy,
+blockingBlock,
+dirX,
+dirY
+);
+
+}else{
+
+let movement=enemy.speed;
+
+if(slowFieldActive)
+movement*=.45;
+
+enemy.x+=dirX*movement;
+enemy.y+=dirY*movement;
+
+}
+
+}
+
+/* =========================
+   BALL COLLISION
+========================= */
+
+const ballX=x+BALL_RADIUS;
+const ballY=y+BALL_RADIUS;
+
+const hitDistance=
+Math.hypot(
+enemy.x-ballX,
+enemy.y-ballY
+);
+
+const killRadius=
+BALL_RADIUS+
+enemy.radius+
+6;
+
+/*
+ FAST BALL KILLS NORMAL ENEMIES
+ */
+
+if(
+hitDistance<=killRadius &&
+isBallFastEnoughForImmunity()
+){
+
+killEnemy(i);
+continue;
+
+}
+
+/*
+ Contact damage
+ */
+
+if(
+hitDistance<=BALL_RADIUS+enemy.radius+5
+){
+
+if(
+!isBallFastEnoughForImmunity() &&
+!phaseShieldActive &&
+enemy.damageTimer<=0
+){
+
+damageBall(
+(enemy.boss?20:
+enemy.green?8:
+enemy.popupEnemy?7:
+6)/toughness
+);
+
+/*
+ GREEN VIRUS:
+ running into it sets speed to EXACTLY
+ 0.5x original speed.
+ */
+
+if(enemy.green){
+
+applyPlayerSlow();
+
+}
+
+enemy.damageTimer=30;
+
+}
+
+}
+
+enemy.damageTimer--;
+
+enemy.element.style.left=
+(enemy.x-enemy.radius)+"px";
+
+enemy.element.style.top=
+(enemy.y-enemy.radius)+"px";
+
+}
+
+enemyCountDisplay.textContent=enemies.length;
+
+checkWaveEnd();
+
+}
+
+/* =========================
+   KILL ENEMY
+========================= */
+
+function killEnemy(index){
+
+if(index<0||index>=enemies.length)return;
+
+const enemy=enemies[index];
+
+/*
+ BOMB CANNOT BE KILLED.
+ It must stand still until its timer ends.
+ */
+
+if(enemy.bomb){
+
+return;
+
+}
+
+if(enemy.boss){
+
+enemy.health=0;
+bossAlive=false;
+
+bossBar.style.display="none";
+bossName.style.display="none";
+
+score+=1000;
+
+createParticles(
+enemy.x,
+enemy.y,
+"#ff00ff",
+80
+);
+
+for(let i=0;i<12;i++){
+
+spawnLoot(
+enemy.x+(Math.random()-.5)*100,
+enemy.y+(Math.random()-.5)*100
+);
+
+}
+
+enemy.element.remove();
+
+enemies.splice(index,1);
+
+showSpeedFlash(
+"ULTIMATE VIRUS DESTROYED!"
+);
+
+return;
+
+}
+
+/* =========================
+   GREEN VIRUS
+========================= */
+
+if(enemy.green){
+
+score+=25;
+
+createParticles(
+enemy.x,
+enemy.y,
+"#00ff55",
+35
+);
+
+}
+
+/* =========================
+   POPUP VIRUS
+========================= */
+
+if(enemy.popupEnemy){
+
+score+=35;
+
+createParticles(
+enemy.x,
+enemy.y,
+"#00eaff",
+35
+);
+
+spawnMalwarePopups(
+enemy.x,
+enemy.y
+);
+
+showSpeedFlash(
+"⚠ POPUP VIRUS ATTACK!"
+);
+
+}
+
+if(!enemy.green&&!enemy.popupEnemy){
+
+score+=10;
+
+createParticles(
+enemy.x,
+enemy.y,
+"#ff0000",
+14
+);
+
+}
+
+const lootChance=
+Math.min(
+.24+wave*.018,
+.65
+);
+
+if(
+Math.random()<lootChance
+){
+
+spawnLoot(
+enemy.x,
+enemy.y
+);
+
+}
+
+enemy.element.remove();
+
+enemies.splice(index,1);
+
+}
+
+/* =========================
+   PLAYER SLOW
+========================= */
+
+function applyPlayerSlow(){
+
+/*
+ If already slowed, restart the timer but do NOT
+ keep multiplying the speed by .5.
+ */
+
+if(playerSlowTimer>0){
+
+playerSlowTimer=60*5;
+
+return;
+
+}
+
+/*
+ Save the player's current velocity.
+ */
+
+savedSpeedX=speedX;
+savedSpeedY=speedY;
+
+/*
+ EXACTLY 0.5x ORIGINAL SPEED.
+ */
+
+setSpeedMagnitude(ORIGINAL_SPEED*0.5);
+
+playerSlowFactor=.5;
+
+playerSlowTimer=60*5;
+
+slowOverlay.style.display="block";
+
+showSpeedFlash(
+"🟢 SPEED VIRUS! SPEED = 0.50x"
+);
+
+}
+
+function updatePlayerSlow(){
+
+if(playerSlowTimer<=0)return;
+
+playerSlowTimer--;
+
+if(playerSlowTimer<=0){
+
+/*
+ Restore the speed the player had before
+ the green virus hit.
+ */
+
+speedX=savedSpeedX;
+speedY=savedSpeedY;
+
+playerSlowFactor=1;
+
+slowOverlay.style.display="none";
+
+showSpeedFlash(
+"GREEN SLOW EXPIRED"
+);
+
+}
+
+}
+
+/* =========================
+   BOSS BAR
+========================= */
+
+function updateBossBar(){
+
+const boss=enemies.find(e=>e.boss);
+
+if(!boss){
+
+bossBar.style.display="none";
+bossName.style.display="none";
+
+return;
+
+}
+
+const percent=
+Math.max(
+0,
+boss.health/boss.maxHealth*100
+);
+
+bossFill.style.width=
+percent+"%";
+
+}
+
+/* =========================
+   LOOT
+========================= */
+
+function spawnLoot(px,py){
+
+const random=Math.random();
+
+let type;
+
+if(random<.14){
+
+type="shieldPlug";
+
+}else if(random<.27){
+
+type="toughnessChip";
+
+}else if(random<.39){
+
+type="repairCore";
+
+}else if(random<.51){
+
+type="speedCore";
+
+}else if(random<.63){
+
+type="blastCore";
+
+}else if(random<.75){
+
+type="magnetCore";
+
+}else if(random<.85){
+
+type="phaseCore";
+
+}else if(random<.94){
+
+type="powerCore";
+
+}else{
+
+type="slowCore";
+
+}
+
+const element=document.createElement("div");
+
+element.className="loot";
+element.textContent=
+inventoryItems[type].icon;
+
+element.style.left=(px-15)+"px";
+element.style.top=(py-15)+"px";
+
+document.body.appendChild(element);
+
+loot.push({
+
+x:px,
+y:py,
+
+type,
+
+life:1400,
+
+element
+
+});
+
+}
+
+function updateLoot(){
+
+for(let i=loot.length-1;i>=0;i--){
+
+const item=loot[i];
+
+item.life--;
+
+if(magnetActive){
+
+const dx=(x+BALL_RADIUS)-item.x;
+const dy=(y+BALL_RADIUS)-item.y;
+
+const dist=Math.hypot(dx,dy)||1;
+
+if(dist<360){
+
+item.x+=dx/dist*2.8;
+item.y+=dy/dist*2.8;
+
+item.element.style.left=
+(item.x-15)+"px";
+
+item.element.style.top=
+(item.y-15)+"px";
+
+}
+
+}
+
+const distance=
+Math.hypot(
+(x+BALL_RADIUS)-item.x,
+(y+BALL_RADIUS)-item.y
+);
+
+if(distance<BALL_RADIUS+18){
+
+inventoryCounts[item.type]++;
+
+createParticles(
+item.x,
+item.y,
+"#ffffff",
+12
+);
+
+item.element.remove();
+
+loot.splice(i,1);
+
+renderInventory();
+
+continue;
+
+}
+
+if(item.life<=0){
+
+item.element.remove();
+loot.splice(i,1);
+
+}
+
+}
+
+}
+
+function renderInventory(){
+
+itemsPanel.innerHTML="";
+
+let found=false;
+
+for(const type in inventoryCounts){
+
+const count=inventoryCounts[type];
+
+if(count<=0)continue;
+
+found=true;
+
+const item=document.createElement("div");
+
+item.className="item";
+
+item.innerHTML=`
+<div class="itemIcon">
+${inventoryItems[type].icon}
+</div>
+<div class="itemName">
+${inventoryItems[type].name}
+</div>
+<div class="itemCount">
+x${count}<br>
+Double-click to activate
+</div>
+`;
+
+item.addEventListener(
+"dblclick",
+()=>{
+activateLoot(type);
+}
+);
+
+itemsPanel.appendChild(item);
+
+}
+
+if(!found){
+
+itemsPanel.innerHTML=`
+<div style="
+grid-column:1/-1;
+text-align:center;
+color:#777;
+padding:30px;
+">
+No loot yet.
+</div>
+`;
+
+}
+
+}
+
+/* =========================
+   POWERUPS
+========================= */
+
+function activateLoot(type){
+
+if(inventoryCounts[type]<=0)return;
+
+inventoryCounts[type]--;
+
+if(type==="shieldPlug"){
+
+shieldActive=true;
+shieldTimer=600;
+
+powerupAnimation(
+"🛡️",
+"SHIELD ONLINE — 10 SECONDS"
+);
+
+shield.classList.remove("powerupActive");
+
+void shield.offsetWidth;
+
+shield.classList.add("powerupActive");
+
+showSpeedFlash(
+"SHIELD ONLINE"
+);
+
+}
+
+if(type==="toughnessChip"){
+
+toughness+=.4;
+
+speedX*=.78;
+speedY*=.78;
+
+powerupAnimation(
+"🔩",
+"TOUGHNESS INCREASED"
+);
+
+}
+
+if(type==="repairCore"){
+
+health=Math.min(
+maxHealth,
+health+35
+);
+
+powerupAnimation(
+"❤️",
+"REPAIRED +35 HP"
+);
+
+}
+
+if(type==="speedCore"){
+
+speedX*=1.32;
+speedY*=1.32;
+
+limitSpeed();
+
+powerupAnimation(
+"⚡",
+"SPEED CORE"
+);
+
+}
+
+if(type==="blastCore"){
+
+powerupAnimation(
+"💥",
+"BLAST CORE"
+);
+
+for(let i=enemies.length-1;i>=0;i--){
+
+const enemy=enemies[i];
+
+const distance=
+Math.hypot(
+enemy.x-(x+BALL_RADIUS),
+enemy.y-(y+BALL_RADIUS)
+);
+
+if(
+distance<320 &&
+!enemy.boss &&
+!enemy.bomb
+){
+
+killEnemy(i);
+
+}
+
+}
+
+createParticles(
+x+BALL_RADIUS,
+y+BALL_RADIUS,
+"#ffff00",
+80
+);
+
+}
+
+if(type==="magnetCore"){
+
+magnetActive=true;
+magnetTimer+=1200;
+
+powerupAnimation(
+"🧲",
+"MAGNET ACTIVE"
+);
+
+}
+
+if(type==="phaseCore"){
+
+phaseShieldActive=true;
+phaseShieldTimer+=900;
+
+powerupAnimation(
+"🔷",
+"PHASE SHIELD"
+);
+
+}
+
+if(type==="powerCore"){
+
+damageBoost+=.75;
+damageBoostTimer+=1000;
+
+powerupAnimation(
+"🔥",
+"POWER BOOST"
+);
+
+}
+
+if(type==="slowCore"){
+
+slowFieldActive=true;
+slowFieldTimer+=1000;
+
+powerupAnimation(
+"⏱️",
+"TIME SLOW"
+);
+
+}
+
+renderInventory();
+updateHUD();
+
+}
+
+function updatePowerups(){
+
+if(shieldTimer>0){
+
+shieldTimer--;
+
+if(shieldTimer<=0){
+
+shieldActive=false;
+
+showSpeedFlash(
+"SHIELD EXPIRED"
+);
+
+}
+
+}
+
+if(magnetTimer>0){
+
+magnetTimer--;
+
+}else{
+
+magnetActive=false;
+
+}
+
+if(phaseShieldTimer>0){
+
+phaseShieldTimer--;
+
+}else{
+
+phaseShieldActive=false;
+
+}
+
+if(damageBoostTimer>0){
+
+damageBoostTimer--;
+
+}else{
+
+damageBoost=1;
+
+}
+
+if(slowFieldTimer>0){
+
+slowFieldTimer--;
+
+}else{
+
+slowFieldActive=false;
+
+}
+
+}
+
+/* =========================
+   SHIELD
+========================= */
+
+function updateShield(){
+
+if(!shieldActive){
+
+shield.style.display="none";
+return;
+
+}
+
+shield.style.display="block";
+
+shieldAngle+=.045;
+
+const centerX=x+BALL_RADIUS;
+const centerY=y+BALL_RADIUS;
+
+const orbit=72;
+
+const shieldX=
+centerX+
+Math.cos(shieldAngle)*orbit;
+
+const shieldY=
+centerY+
+Math.sin(shieldAngle)*orbit;
+
+shield.style.left=
+(shieldX-29)+"px";
+
+shield.style.top=
+(shieldY-39)+"px";
+
+const rotation=
+shieldAngle*180/Math.PI+90;
+
+shield.style.transform=
+"rotate("+rotation+"deg)";
+
+}
+
+function checkShieldCollision(){
+
+if(!shieldActive)return;
+
+const centerX=x+BALL_RADIUS;
+const centerY=y+BALL_RADIUS;
+
+const shieldX=
+centerX+
+Math.cos(shieldAngle)*72;
+
+const shieldY=
+centerY+
+Math.sin(shieldAngle)*72;
+
+for(let i=enemies.length-1;i>=0;i--){
+
+const enemy=enemies[i];
+
+/*
+ Shield cannot destroy the bomb.
+ */
+
+if(enemy.bomb)continue;
+
+const distance=
+Math.hypot(
+enemy.x-shieldX,
+enemy.y-shieldY
+);
+
+if(distance<48){
+
+if(!enemy.boss){
+
+killEnemy(i);
+
+}else{
+
+enemy.health-=15;
+
+updateBossBar();
+
+}
+
+}
+
+}
+
+}
+
+/* =========================
+   DAMAGE
+========================= */
+
+function damageBall(amount){
+
+if(
+isBallFastEnoughForImmunity()||
+phaseShieldActive
+){
+
+return;
+
+}
+
+health-=amount;
+
+health=Math.max(0,health);
+
+if(health<=0){
+
+gameOver();
+
+}
+
+}
+
+/* =========================
+   PARTICLES
+========================= */
+
+function createParticles(px,py,color,amount){
+
+for(let i=0;i<amount;i++){
+
+const particle=document.createElement("div");
+
+particle.style.position="fixed";
+particle.style.left=px+"px";
+particle.style.top=py+"px";
+particle.style.width=
+(3+Math.random()*5)+"px";
+particle.style.height=
+(3+Math.random()*5)+"px";
+particle.style.borderRadius="50%";
+particle.style.background=color;
+particle.style.pointerEvents="none";
+particle.style.zIndex="100";
+
+const angle=
+Math.random()*Math.PI*2;
+
+const velocity=
+1+Math.random()*5;
+
+let life=25;
+
+function animate(){
+
+particle.style.left=
+(
+px+
+Math.cos(angle)*
+velocity*
+(25-life)
+)+"px";
+
+particle.style.top=
+(
+py+
+Math.sin(angle)*
+velocity*
+(25-life)
+)+"px";
+
+particle.style.opacity=
+life/25;
+
+life--;
+
+if(life>0){
+
+requestAnimationFrame(animate);
+
+}else{
+
+particle.remove();
+
+}
+
+}
+
+animate();
+
+}
+
+}
+
+/* =========================
+   MALWARE POPUPS
+========================= */
+
+function spawnMalwarePopups(px,py){
+
+const amount=
+5+
+Math.floor(Math.random()*5);
+
+for(let i=0;i<amount;i++){
+
+setTimeout(()=>{
+
+if(!running)return;
+
+createMalwarePopup(
+px+
+(Math.random()-.5)*400,
+py+
+(Math.random()-.5)*300
+);
+
+},i*90);
+
+}
+
+}
+
+function createMalwarePopup(px,py){
+
+const popup=document.createElement("div");
+
+popup.className="malwarePopup";
+
+const maxX=
+Math.max(
+10,
+innerWidth-310
+);
+
+const maxY=
+Math.max(
+10,
+innerHeight-220
+);
+
+popup.style.left=
+Math.max(
+10,
+Math.min(maxX,px)
+)+"px";
+
+popup.style.top=
+Math.max(
+10,
+Math.min(maxY,py)
+)+"px";
+
+popup.innerHTML=`
+
+<div class="malwareTitle">
+
+<span>
+FREE MALWARE REMOVAL
+</span>
+
+<button class="malwareClose">
+×
+</button>
+
+</div>
+
+<div class="malwareBody">
+
+<div class="malwareWarning">
+⚠️
+</div>
+
+<h3>
+VIRUS DETECTED!
+</h3>
+
+<p>
+Your computer may have been infected.
+Click the X to close this fake warning.
+</p>
+
+<div class="malwareFakeButton">
+FREE MALWARE REMOVAL
+</div>
+
+</div>
+
+`;
+
+const closeButton=
+popup.querySelector(".malwareClose");
+
+closeButton.addEventListener(
+"click",
+event=>{
+
+event.stopPropagation();
+
+popup.style.animation=
+"popupAppear .2s reverse";
+
+setTimeout(()=>{
+popup.remove();
+},180);
+
+});
+
+malwarePopups.appendChild(popup);
+
+}
+
+/* =========================
+   BALL MOVEMENT
+========================= */
+
+function moveBall(){
+
+if(running){
+
+const distance=getSpeed();
+
+const steps=
+Math.max(
+1,
+Math.ceil(distance/5)
+);
+
+const stepX=speedX/steps;
+const stepY=speedY/steps;
+
+for(let i=0;i<steps;i++){
+
+x+=stepX;
+y+=stepY;
+
+const maxX=
+innerWidth-BALL_SIZE;
+
+const maxY=
+innerHeight-BALL_SIZE;
+
+if(x<=0&&speedX<0){
+
+x=0;
+kineticWindowBounce(1,0);
+
+}
+
+if(x>=maxX&&speedX>0){
+
+x=maxX;
+kineticWindowBounce(-1,0);
+
+}
+
+if(y<=0&&speedY<0){
+
+y=0;
+kineticWindowBounce(0,1);
+
+}
+
+if(y>=maxY&&speedY>0){
+
+y=maxY;
+kineticWindowBounce(0,-1);
+
+}
+
+checkCursorCollision();
+checkBlockCollisions();
+
+}
+
+ball.style.left=x+"px";
+ball.style.top=y+"px";
+
+}
+
+requestAnimationFrame(moveBall);
+
+}
+
+/* =========================
+   HUD
+========================= */
+
+function updateHUD(){
+
+waveDisplay.textContent=wave;
+enemyCountDisplay.textContent=enemies.length;
+scoreDisplay.textContent=score;
+
+healthFill.style.width=
+health+"%";
+
+speedDisplay.textContent=
+(getSpeed()/ORIGINAL_SPEED).toFixed(2)+"x";
+
+toughnessDisplay.textContent=
+toughness.toFixed(2)+"x";
+
+if(
+isBallFastEnoughForImmunity()
+){
+
+speedDisplay.style.color="#00ff66";
+
+}else{
+
+speedDisplay.style.color="#ff4444";
+
+}
+
+}
+
+/* =========================
+   GAME OVER / WIN
+========================= */
+
+function gameOver(){
+
+running=false;
+
+finalScore.textContent=
+"Wave "+wave+
+" • Score "+score;
+
+gameOverScreen.querySelector("h1").textContent=
+"GAME OVER";
+
+gameOverScreen.style.display="flex";
+
+}
+
+function gameWin(){
+
+running=false;
+
+bossBar.style.display="none";
+bossName.style.display="none";
+
+finalScore.textContent=
+"YOU DEFEATED THE ULTIMATE VIRUS! • SCORE "+score;
+
+gameOverScreen.querySelector("h1").textContent=
+"YOU WIN!";
+
+gameOverScreen.style.display="flex";
+
+}
+
+/* =========================
+   RESET
+========================= */
+
+function resetGame(){
+
+enemies.forEach(e=>e.element.remove());
+blocks.forEach(b=>b.element.remove());
+loot.forEach(l=>l.element.remove());
+
+enemies=[];
+blocks=[];
+loot=[];
+
+malwarePopups.innerHTML="";
+
+document
+.querySelectorAll(".bombFire")
+.forEach(e=>e.remove());
+
+x=(innerWidth-BALL_SIZE)/2;
+y=(innerHeight-BALL_SIZE)/2;
+
+speedX=START_SPEED_X;
+speedY=START_SPEED_Y;
+
+savedSpeedX=START_SPEED_X;
+savedSpeedY=START_SPEED_Y;
+
+health=100;
+maxHealth=100;
+
+toughness=1;
+
+wave=0;
+score=0;
+
+shieldActive=false;
+shieldAngle=0;
+shieldTimer=0;
+
+magnetActive=false;
+magnetTimer=0;
+
+phaseShieldActive=false;
+phaseShieldTimer=0;
+
+damageBoost=1;
+damageBoostTimer=0;
+
+slowFieldActive=false;
+slowFieldTimer=0;
+
+playerSlowFactor=1;
+playerSlowTimer=0;
+
+bombActive=false;
+bombTimer=0;
+bombX=0;
+bombY=0;
+bombEnemy=null;
+
+bombCountdown.style.display="none";
+bombWarning.style.display="none";
+
+waveSpawning=false;
+waveTransition=false;
+bossAlive=false;
+
+eraserMode=false;
+trashVisible=false;
+
+trashButton.style.display="none";
+inventory.style.display="none";
+eraser.style.display="none";
+
+slowOverlay.style.display="none";
+
+bossBar.style.display="none";
+bossName.style.display="none";
+
+gameOverScreen.querySelector("h1").textContent=
+"GAME OVER";
+
+for(const type in inventoryCounts){
+
+inventoryCounts[type]=0;
+
+}
+
+renderInventory();
+updateHUD();
+
+}
+
+function startGame(){
+
+resetGame();
+
+running=true;
+
+startScreen.style.display="none";
+gameOverScreen.style.display="none";
+
+startWave();
+
+}
+
+/* =========================
+   CONTROLS
+========================= */
+
+document.addEventListener(
+"keydown",
+event=>{
+
+const key=
+event.key.toLowerCase();
+
+if(key==="t"){
+
+trashVisible=!trashVisible;
+
+trashButton.style.display=
+trashVisible?
+"flex":
+"none";
+
+if(!trashVisible){
+
+inventory.style.display="none";
+
+}
+
+}
+
+if(key==="e"){
+
+eraserMode=!eraserMode;
+
+eraser.style.display=
+eraserMode?
+"block":
+"none";
+
+dragging=false;
+
+blockPreview.style.display="none";
+
+}
+
+if(event.key==="Escape"){
+
+inventory.style.display="none";
+
+}
+
+}
+);
+
+trashButton.addEventListener(
+"dblclick",
+event=>{
+
+event.stopPropagation();
+
+inventory.style.display=
+inventory.style.display==="block"
+?"none":
+"block";
+
+renderInventory();
+
+}
+);
+
+document.addEventListener(
+"mousedown",
+startBlock
+);
+
+document.addEventListener(
+"mousemove",
+event=>{
+
+mouseX=event.clientX;
+mouseY=event.clientY;
+mouseInside=true;
+
+dragBlock(event);
+
+}
+);
+
+document.addEventListener(
+"mouseup",
+finishBlock
+);
+
+document.addEventListener(
+"mouseleave",
+()=>{
+mouseInside=false;
+}
+);
+
+/* =========================
+   TOUCH
+========================= */
+
+document.addEventListener(
+"touchstart",
+event=>{
+
+if(event.touches.length!==1)return;
+
+const touch=
+event.touches[0];
+
+startBlock({
+
+clientX:touch.clientX,
+clientY:touch.clientY,
+target:document.body
+
+});
+
+},
+{passive:false}
+);
+
+document.addEventListener(
+"touchmove",
+event=>{
+
+if(!dragging)return;
+
+event.preventDefault();
+
+const touch=
+event.touches[0];
+
+dragBlock({
+
+clientX:touch.clientX,
+clientY:touch.clientY
+
+});
+
+},
+{passive:false}
+);
+
+document.addEventListener(
+"touchend",
+finishBlock
+);
+
+document
+.getElementById("startButton")
+.addEventListener(
+"click",
+startGame
+);
+
+document
+.getElementById("restartButton")
+.addEventListener(
+"click",
+startGame
+);
+
+/* =========================
+   RESIZE
+========================= */
+
+let oldWidth=innerWidth;
+let oldHeight=innerHeight;
+
+window.addEventListener(
+"resize",
+()=>{
+
+const newWidth=innerWidth;
+const newHeight=innerHeight;
+
+const widthChange=
+newWidth-oldWidth;
+
+const heightChange=
+newHeight-oldHeight;
+
+const maxX=
+newWidth-BALL_SIZE;
+
+const maxY=
+newHeight-BALL_SIZE;
+
+if(
+widthChange<0 &&
+x>maxX
+){
+
+const impact=
+Math.abs(widthChange);
+
+x=maxX;
+
+speedX=
+-Math.abs(speedX)-
+Math.min(
+15,
+impact*.45
+);
+
+limitSpeed();
+
+}
+
+if(
+heightChange<0 &&
+y>maxY
+){
+
+const impact=
+Math.abs(heightChange);
+
+y=maxY;
+
+speedY=
+-Math.abs(speedY)-
+Math.min(
+15,
+impact*.45
+);
+
+limitSpeed();
+
+}
+
+x=Math.max(
+0,
+Math.min(x,maxX)
+);
+
+y=Math.max(
+0,
+Math.min(y,maxY)
+);
+
+oldWidth=newWidth;
+oldHeight=newHeight;
+
+}
+);
+
+/* =========================
+   MAIN LOOP
+========================= */
+
+function gameLoop(){
+
+if(running){
+
+updateEnemies();
+updateLoot();
+updateShield();
+checkShieldCollision();
+updatePowerups();
+updatePlayerSlow();
+updateTimeBomb();
+
+updateBossBar();
+updateHUD();
+
+}
+
+requestAnimationFrame(gameLoop);
+
+}
+
+ball.style.left=x+"px";
+ball.style.top=y+"px";
+
+renderInventory();
+updateHUD();
+
+gameLoop();
+moveBall();
+
+</script>
+
+</body>
+</html>
