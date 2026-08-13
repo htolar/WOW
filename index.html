@@ -79,6 +79,15 @@ background:#28ff72;
 box-shadow:0 0 8px #00ff55,0 0 22px #00ff55;
 }
 
+.enemy.purple{
+background:#a020f0;
+box-shadow:
+0 0 10px #c000ff,
+0 0 25px #8b00ff,
+0 0 45px #ff00ff;
+animation:purplePulse .45s infinite alternate;
+}
+
 .enemy.boss{
 width:55px;
 height:55px;
@@ -109,6 +118,15 @@ box-shadow:
 animation:popupEnemyPulse .5s infinite alternate
 }
 
+.enemy.bomb.armed{
+animation:bombArmedPulse .25s infinite alternate;
+background:#ff2200;
+box-shadow:
+0 0 15px #ff0000,
+0 0 35px #ff5e00,
+0 0 65px #ff0000;
+}
+
 .enemy.burrowing{
 box-shadow:
 0 0 8px #ff0000,
@@ -121,6 +139,13 @@ box-shadow:
 0 0 8px #00ff55,
 0 0 25px #00ff55,
 0 0 40px rgba(0,255,80,.8)
+}
+
+.enemy.purple.burrowing{
+box-shadow:
+0 0 8px #d000ff,
+0 0 25px #9d00ff,
+0 0 40px rgba(200,0,255,.8)
 }
 
 .enemy::after{
@@ -136,9 +161,18 @@ animation:tunnelPulse .35s infinite alternate
 border-color:rgba(0,255,80,.35)
 }
 
+.enemy.purple::after{
+border-color:rgba(210,0,255,.55)
+}
+
 .enemy.bomb::after{
 border-color:rgba(255,180,0,.7);
 inset:-8px
+}
+
+.enemy.bomb.armed::after{
+border-color:rgba(255,0,0,.9);
+inset:-12px
 }
 
 .enemy.popupEnemy::after{
@@ -157,6 +191,19 @@ from{transform:scale(.72);opacity:.65}
 to{transform:scale(1.3);opacity:1}
 }
 
+@keyframes purplePulse{
+from{
+transform:scale(.75);
+opacity:.7;
+filter:hue-rotate(0deg)
+}
+to{
+transform:scale(1.3);
+opacity:1;
+filter:hue-rotate(25deg)
+}
+}
+
 @keyframes bossPulse{
 from{transform:scale(.85);opacity:.8}
 to{transform:scale(1.12);opacity:1}
@@ -172,67 +219,25 @@ from{transform:scale(.7);filter:brightness(1)}
 to{transform:scale(1.25);filter:brightness(2)}
 }
 
-@keyframes popupEnemyPulse{
-from{transform:scale(.75) rotate(0deg)}
-to{transform:scale(1.25) rotate(180deg)}
-}
-
-/* =========================
-   BOMB FIRE
-========================= */
-
-.bombFire{
-position:fixed;
-width:500px;
-height:500px;
-border-radius:50%;
-transform:translate(-50%,-50%);
-z-index:11;
-pointer-events:none;
-background:
-radial-gradient(
-circle,
-rgba(255,255,180,.95) 0%,
-rgba(255,180,0,.8) 18%,
-rgba(255,70,0,.6) 42%,
-rgba(255,0,0,.28) 65%,
-rgba(255,0,0,0) 100%
-);
-box-shadow:
-0 0 30px #ffb300,
-0 0 70px #ff5e00,
-0 0 130px #ff0000;
-animation:bombFirePulse .3s infinite alternate;
-}
-
-.bombFire::after{
-content:"";
-position:absolute;
-inset:35px;
-border:5px solid rgba(255,230,100,.8);
-border-radius:50%;
-animation:fireRing .5s infinite alternate;
-}
-
-@keyframes bombFirePulse{
-from{
-transform:translate(-50%,-50%) scale(.92);
-opacity:.75
-}
-to{
-transform:translate(-50%,-50%) scale(1.08);
-opacity:1
-}
-}
-
-@keyframes fireRing{
+@keyframes bombArmedPulse{
 from{
 transform:scale(.85);
-opacity:.3
+filter:brightness(1);
 }
 to{
-transform:scale(1.08);
-opacity:.9
+transform:scale(1.4);
+filter:brightness(3);
+}
+}
+
+@keyframes firePulse{
+from{
+transform:scale(.8);
+opacity:.65;
+}
+to{
+transform:scale(1.15);
+opacity:1;
 }
 }
 
@@ -655,7 +660,20 @@ display:none;
 }
 
 /* =========================
-   TIME BOMB COUNTDOWN
+   TOUGHNESS DEBUFF
+========================= */
+
+#toughnessOverlay{
+position:fixed;
+inset:0;
+background:rgba(170,0,255,.045);
+pointer-events:none;
+z-index:349;
+display:none
+}
+
+/* =========================
+   TIME BOMB
 ========================= */
 
 #bombCountdown{
@@ -675,11 +693,6 @@ pointer-events:none;
 animation:countdownPulse .5s infinite alternate
 }
 
-@keyframes countdownPulse{
-from{transform:translateX(-50%) scale(.9)}
-to{transform:translateX(-50%) scale(1.1)}
-}
-
 #bombWarning{
 position:fixed;
 left:50%;
@@ -692,6 +705,11 @@ z-index:400;
 display:none;
 pointer-events:none;
 animation:warningFlash .4s infinite alternate
+}
+
+@keyframes countdownPulse{
+from{transform:translateX(-50%) scale(.9)}
+to{transform:translateX(-50%) scale(1.1)}
 }
 
 @keyframes warningFlash{
@@ -858,6 +876,7 @@ color:#000
 <div id="shield"></div>
 <div id="blockPreview"></div>
 <div id="slowOverlay"></div>
+<div id="toughnessOverlay"></div>
 
 <div id="bossBar">
 <div id="bossFill"></div>
@@ -924,10 +943,9 @@ the blocks while tunneling.<br><br>
 You must be moving <b>10x the original speed</b> to become
 immune to enemy contact damage and destroy enemies by impact.<br><br>
 
-Green viruses slow the player to <b>0.5x original speed</b>
-for 5 seconds.<br>
-The first wave contains a dangerous Time Bomb.<br>
-Some viruses can trigger fake malware popup attacks.<br>
+Green viruses slow the player to <b>0.50x speed</b> for 5 seconds.<br>
+Purple viruses reduce toughness to <b>0.50x</b> for 20 seconds.<br>
+Orange Time Bomb viruses freeze and explode 5 seconds after being destroyed.<br>
 Wave 20 contains the Ultimate Virus.
 </p>
 
@@ -974,7 +992,9 @@ const finalScore=document.getElementById("finalScore");
 const bossBar=document.getElementById("bossBar");
 const bossFill=document.getElementById("bossFill");
 const bossName=document.getElementById("bossName");
+
 const slowOverlay=document.getElementById("slowOverlay");
+const toughnessOverlay=document.getElementById("toughnessOverlay");
 
 const bombCountdown=document.getElementById("bombCountdown");
 const bombWarning=document.getElementById("bombWarning");
@@ -1006,6 +1026,11 @@ let health=100;
 let maxHealth=100;
 
 let toughness=1;
+
+/* PURPLE TOUGHNESS DEBUFF */
+let normalToughness=1;
+let toughnessDebuffActive=false;
+let toughnessDebuffTimer=0;
 
 let wave=0;
 let score=0;
@@ -1048,29 +1073,16 @@ let damageBoostTimer=0;
 let slowFieldActive=false;
 let slowFieldTimer=0;
 
-/* =========================
-   GREEN SPEED VIRUS
-========================= */
-
+/* GREEN VIRUS */
 let playerSlowFactor=1;
 let playerSlowTimer=0;
 
-/* Store the speed before the virus slows us */
-let savedSpeedX=START_SPEED_X;
-let savedSpeedY=START_SPEED_Y;
-
-/* =========================
-   TIME BOMB
-========================= */
-
+/* TIME BOMB */
 let bombActive=false;
 let bombTimer=0;
 let bombX=0;
 let bombY=0;
-let bombEnemy=null;
-
-const BOMB_SECONDS=5;
-const BOMB_FIRE_RADIUS=250;
+let activeBombEnemy=null;
 
 /* =========================
    INVENTORY
@@ -1137,26 +1149,6 @@ inventoryCounts[type]=0;
 
 function getSpeed(){
 return Math.hypot(speedX,speedY);
-}
-
-function setSpeedMagnitude(newSpeed){
-
-const current=getSpeed();
-
-if(current<=0){
-
-speedX=newSpeed;
-speedY=0;
-
-return;
-
-}
-
-const multiplier=newSpeed/current;
-
-speedX*=multiplier;
-speedY*=multiplier;
-
 }
 
 function limitSpeed(){
@@ -1598,6 +1590,7 @@ ey=Math.random()*innerHeight;
 
 const boss=type==="boss";
 const green=type==="green";
+const purple=type==="purple";
 const bomb=type==="bomb";
 const popupEnemy=type==="popup";
 
@@ -1606,6 +1599,7 @@ const element=document.createElement("div");
 element.className="enemy";
 
 if(green)element.classList.add("green");
+if(purple)element.classList.add("purple");
 if(boss)element.classList.add("boss");
 if(bomb)element.classList.add("bomb");
 if(popupEnemy)element.classList.add("popupEnemy");
@@ -1626,7 +1620,9 @@ radius,
 
 speed:
 boss?0.65:
-bomb?0:
+bomb?0.7:
+purple?
+(0.75+wave*.045+Math.random()*.2):
 green?
 (0.65+wave*.045+Math.random()*.18):
 popupEnemy?
@@ -1636,7 +1632,9 @@ popupEnemy?
 tunnelPower:
 boss?3.5:
 green?1.25:
+purple?1.15:
 popupEnemy?1.1:
+bomb?1:
 1,
 
 damageTimer:0,
@@ -1644,6 +1642,7 @@ damageTimer:0,
 element,
 boss,
 green,
+purple,
 bomb,
 popupEnemy,
 
@@ -1656,28 +1655,13 @@ boss?5000:1,
 maxHealth:
 boss?5000:1,
 
-slowOnDeath:green
+slowOnDeath:green,
+
+armed:false
 
 };
 
 enemies.push(enemy);
-
-/*
- BOMB:
- Immediately becomes stationary and starts its
- 5-second countdown.
- */
-
-if(bomb){
-
-bombEnemy=enemy;
-
-bombX=enemy.x;
-bombY=enemy.y;
-
-startTimeBomb(enemy);
-
-}
 
 return enemy;
 
@@ -1728,22 +1712,45 @@ if(!running)return;
 
 let type="red";
 
+const roll=Math.random();
+
+/* GREEN */
 if(
 wave>=3 &&
-Math.random()<
-Math.min(.12+wave*.018,.35)
+roll<Math.min(.12+wave*.018,.30)
 ){
 
 type="green";
 
 }
 
-if(
+/* PURPLE */
+else if(
+wave>=2 &&
+roll<Math.min(.20+wave*.015,.34)
+){
+
+type="purple";
+
+}
+
+/* POPUP */
+else if(
 wave>=4 &&
-Math.random()<Math.min(.08+wave*.012,.18)
+roll<Math.min(.28+wave*.012,.42)
 ){
 
 type="popup";
+
+}
+
+/* BOMB */
+else if(
+wave>=2 &&
+roll<Math.min(.34+wave*.008,.48)
+){
+
+type="bomb";
 
 }
 
@@ -1754,30 +1761,9 @@ spawnEnemy(type);
 }
 
 /*
- TIME BOMB IN WAVE 1
+ Bombs are now normal wave enemies.
+ No special forced bomb at the beginning.
  */
-
-if(wave===1){
-
-setTimeout(()=>{
-
-if(running){
-
-spawnEnemy(
-"bomb",
-innerWidth/2,
-80
-);
-
-showSpeedFlash(
-"⚠ TIME BOMB VIRUS DETECTED!"
-);
-
-}
-
-},500);
-
-}
 
 setTimeout(()=>{
 
@@ -1839,10 +1825,20 @@ Math.random()*Math.PI*2;
 const bx=innerWidth/2;
 const by=Math.min(innerHeight/2,150);
 
+const randomRoll=Math.random();
+
+let type="red";
+
+if(randomRoll<.20){
+type="green";
+}else if(randomRoll<.38){
+type="purple";
+}else if(randomRoll<.52){
+type="bomb";
+}
+
 spawnEnemy(
-Math.random()<.35?
-"green":
-"red",
+type,
 bx+Math.cos(angle)*70,
 by+Math.sin(angle)*70
 );
@@ -1860,14 +1856,9 @@ function checkWaveEnd(){
 if(
 !running||
 waveSpawning||
-waveTransition
+waveTransition||
+bombActive
 )return;
-
-/*
- Do not advance while the bomb is still active.
- */
-
-if(bombActive)return;
 
 if(enemies.length!==0)return;
 
@@ -1909,27 +1900,41 @@ speedY*=ratio;
    TIME BOMB
 ========================= */
 
-function startTimeBomb(enemy){
-
-/*
- Only one bomb can be active.
- */
+function armTimeBomb(enemy){
 
 if(bombActive)return;
 
 bombActive=true;
 
-bombEnemy=enemy;
+activeBombEnemy=enemy;
 
 bombX=enemy.x;
 bombY=enemy.y;
 
-bombTimer=BOMB_SECONDS*60;
+bombTimer=5*60;
+
+enemy.armed=true;
+
+/*
+ Stop the bomb completely.
+ */
+
+enemy.speed=0;
+
+enemy.burrowing=false;
+enemy.burrowBlock=null;
+
+enemy.element.classList.remove("burrowing");
+enemy.element.classList.add("armed");
 
 bombCountdown.style.display="block";
 bombWarning.style.display="block";
 
 updateBombDisplay();
+
+showSpeedFlash(
+"⚠ BOMB ARMED — 5 SECONDS!"
+);
 
 }
 
@@ -1938,13 +1943,10 @@ function updateBombDisplay(){
 if(!bombActive)return;
 
 const seconds=
-Math.max(
-1,
-Math.ceil(bombTimer/60)
-);
+Math.ceil(bombTimer/60);
 
 bombCountdown.textContent=
-"TIME BOMB: "+seconds;
+"TIME BOMB: "+Math.max(1,seconds);
 
 }
 
@@ -1954,9 +1956,18 @@ if(!bombActive)return;
 
 bombTimer--;
 
+if(activeBombEnemy){
+
+bombX=activeBombEnemy.x;
+bombY=activeBombEnemy.y;
+
+}
+
 updateBombDisplay();
 
-if(bombTimer<=0){
+if(
+bombTimer<=0
+){
 
 explodeTimeBomb();
 
@@ -1968,96 +1979,88 @@ function explodeTimeBomb(){
 
 if(!bombActive)return;
 
+const explosionX=bombX;
+const explosionY=bombY;
+
 bombActive=false;
 
 bombCountdown.style.display="none";
 bombWarning.style.display="none";
 
 /*
- Remove the bomb enemy only AFTER it explodes.
+ Remove the bomb only AFTER it explodes.
  */
 
-if(
-bombEnemy &&
-enemies.includes(bombEnemy)
-){
+if(activeBombEnemy){
 
-bombEnemy.element.remove();
-
-const index=enemies.indexOf(bombEnemy);
+const index=enemies.indexOf(activeBombEnemy);
 
 if(index>=0){
+
+activeBombEnemy.element.remove();
 enemies.splice(index,1);
-}
 
 }
 
-bombEnemy=null;
+}
+
+activeBombEnemy=null;
 
 /*
  BIG FIRE EXPLOSION
  */
 
 createParticles(
-bombX,
-bombY,
+explosionX,
+explosionY,
 "#ff7b00",
-140
+130
 );
 
 createParticles(
-bombX,
-bombY,
+explosionX,
+explosionY,
 "#ff0000",
 100
 );
 
 createParticles(
-bombX,
-bombY,
-"#ffff55",
-70
+explosionX,
+explosionY,
+"#ffff00",
+60
 );
 
 /*
- Create a visible fire area.
+ Explosion radius.
  */
 
-const fire=document.createElement("div");
-
-fire.className="bombFire";
-
-fire.style.left=bombX+"px";
-fire.style.top=bombY+"px";
-
-document.body.appendChild(fire);
-
-/*
- The player's CENTER must be inside
- the fire radius.
- */
+const EXPLOSION_RADIUS=300;
 
 const distance=
 Math.hypot(
-(x+BALL_RADIUS)-bombX,
-(y+BALL_RADIUS)-bombY
+(x+BALL_RADIUS)-explosionX,
+(y+BALL_RADIUS)-explosionY
 );
 
-if(distance<=BOMB_FIRE_RADIUS){
-
 /*
- HALF OF ORIGINAL/MAXIMUM HEALTH
+ EXACTLY HALF OF ORIGINAL HEALTH
+ if caught in the main explosion.
  */
 
-const bombDamage=maxHealth/2;
+if(distance<=EXPLOSION_RADIUS){
 
-damageBall(bombDamage);
+damageBall(50);
 
 showSpeedFlash(
-"🔥 TIME BOMB HIT! -50 HP"
+"💥 TIME BOMB HIT! -50 HP"
 );
 
 }
+
+/*
+ Damage blocks.
+ */
 
 for(let i=blocks.length-1;i>=0;i--){
 
@@ -2073,13 +2076,19 @@ block.height/2;
 
 const d=
 Math.hypot(
-centerX-bombX,
-centerY-bombY
+centerX-explosionX,
+centerY-explosionY
 );
 
-if(d<BOMB_FIRE_RADIUS){
+if(d<EXPLOSION_RADIUS){
 
-block.hp-=200;
+const damage=
+Math.max(
+80,
+220*(1-d/EXPLOSION_RADIUS)
+);
+
+block.hp-=damage;
 
 if(block.hp<=0){
 
@@ -2088,7 +2097,16 @@ blocks.splice(i,1);
 
 }else{
 
-block.element.style.opacity=".25";
+const hpRatio=
+Math.max(
+0,
+block.hp/block.maxHp
+);
+
+block.element.style.opacity=
+.22+hpRatio*.78;
+
+block.element.classList.add("damaged");
 
 }
 
@@ -2096,13 +2114,34 @@ block.element.style.opacity=".25";
 
 }
 
-showSpeedFlash("💥 TIME BOMB EXPLODED!");
+/*
+ Push normal enemies away from the explosion.
+ */
 
-setTimeout(()=>{
+for(const enemy of enemies){
 
-fire.remove();
+if(enemy.boss)continue;
 
-},1800);
+const dx=enemy.x-explosionX;
+const dy=enemy.y-explosionY;
+
+const d=Math.hypot(dx,dy)||1;
+
+if(d<EXPLOSION_RADIUS){
+
+const push=
+(1-d/EXPLOSION_RADIUS)*25;
+
+enemy.x+=dx/d*push;
+enemy.y+=dy/d*push;
+
+}
+
+}
+
+showSpeedFlash(
+"💥 TIME BOMB EXPLODED!"
+);
 
 }
 
@@ -2179,6 +2218,8 @@ return null;
 }
 
 function burrowEnemy(enemy,block,dirX,dirY){
+
+if(enemy.armed)return;
 
 enemy.burrowing=true;
 enemy.burrowBlock=block;
@@ -2266,14 +2307,10 @@ for(let i=enemies.length-1;i>=0;i--){
 const enemy=enemies[i];
 
 /*
- BOMB DOES NOTHING HERE.
- It stays completely stationary.
+ ARMED BOMBS DO NOTHING EXCEPT WAIT.
  */
 
-if(enemy.bomb){
-
-enemy.x=bombX;
-enemy.y=bombY;
+if(enemy.armed){
 
 enemy.element.style.left=
 (enemy.x-enemy.radius)+"px";
@@ -2384,7 +2421,7 @@ continue;
 }
 
 /*
- Contact damage
+ Contact damage.
  */
 
 if(
@@ -2400,21 +2437,11 @@ enemy.damageTimer<=0
 damageBall(
 (enemy.boss?20:
 enemy.green?8:
+enemy.purple?9:
+enemy.bomb?12:
 enemy.popupEnemy?7:
 6)/toughness
 );
-
-/*
- GREEN VIRUS:
- running into it sets speed to EXACTLY
- 0.5x original speed.
- */
-
-if(enemy.green){
-
-applyPlayerSlow();
-
-}
 
 enemy.damageTimer=30;
 
@@ -2447,17 +2474,6 @@ function killEnemy(index){
 if(index<0||index>=enemies.length)return;
 
 const enemy=enemies[index];
-
-/*
- BOMB CANNOT BE KILLED.
- It must stand still until its timer ends.
- */
-
-if(enemy.bomb){
-
-return;
-
-}
 
 if(enemy.boss){
 
@@ -2498,6 +2514,34 @@ return;
 }
 
 /* =========================
+   TIME BOMB
+========================= */
+
+/*
+ IMPORTANT:
+ The bomb stays alive and visible.
+ It becomes stationary and explodes after 5 seconds.
+ */
+
+if(enemy.bomb){
+
+if(!enemy.armed){
+
+score+=50;
+
+armTimeBomb(enemy);
+
+showSpeedFlash(
+"💣 TIME BOMB ARMED — 5 SECONDS!"
+);
+
+}
+
+return;
+
+}
+
+/* =========================
    GREEN VIRUS
 ========================= */
 
@@ -2510,6 +2554,35 @@ enemy.x,
 enemy.y,
 "#00ff55",
 35
+);
+
+applyPlayerSlow();
+
+showSpeedFlash(
+"GREEN VIRUS: SPEED = 0.50x"
+);
+
+}
+
+/* =========================
+   PURPLE VIRUS
+========================= */
+
+if(enemy.purple){
+
+score+=30;
+
+createParticles(
+enemy.x,
+enemy.y,
+"#c000ff",
+45
+);
+
+applyToughnessDebuff();
+
+showSpeedFlash(
+"PURPLE VIRUS: TOUGHNESS = 0.50x"
 );
 
 }
@@ -2540,7 +2613,11 @@ showSpeedFlash(
 
 }
 
-if(!enemy.green&&!enemy.popupEnemy){
+if(
+!enemy.green &&
+!enemy.purple &&
+!enemy.popupEnemy
+){
 
 score+=10;
 
@@ -2560,7 +2637,8 @@ Math.min(
 );
 
 if(
-Math.random()<lootChance
+Math.random()<lootChance &&
+!enemy.bomb
 ){
 
 spawnLoot(
@@ -2583,40 +2661,41 @@ enemies.splice(index,1);
 function applyPlayerSlow(){
 
 /*
- If already slowed, restart the timer but do NOT
- keep multiplying the speed by .5.
+ Restore the velocity first if an old slow
+ is already active.
  */
 
-if(playerSlowTimer>0){
+if(playerSlowFactor!==1){
 
-playerSlowTimer=60*5;
-
-return;
+speedX/=playerSlowFactor;
+speedY/=playerSlowFactor;
 
 }
 
 /*
- Save the player's current velocity.
+ EXACTLY 0.50x ORIGINAL SPEED.
  */
 
-savedSpeedX=speedX;
-savedSpeedY=speedY;
+const current=getSpeed();
 
-/*
- EXACTLY 0.5x ORIGINAL SPEED.
- */
+if(current>0){
 
-setSpeedMagnitude(ORIGINAL_SPEED*0.5);
+const targetSpeed=
+ORIGINAL_SPEED*.5;
+
+const ratio=
+targetSpeed/current;
+
+speedX*=ratio;
+speedY*=ratio;
+
+}
 
 playerSlowFactor=.5;
 
 playerSlowTimer=60*5;
 
 slowOverlay.style.display="block";
-
-showSpeedFlash(
-"🟢 SPEED VIRUS! SPEED = 0.50x"
-);
 
 }
 
@@ -2626,15 +2705,25 @@ if(playerSlowTimer<=0)return;
 
 playerSlowTimer--;
 
-if(playerSlowTimer<=0){
+if(
+playerSlowTimer<=0
+){
 
 /*
- Restore the speed the player had before
- the green virus hit.
+ Restore to original speed.
  */
 
-speedX=savedSpeedX;
-speedY=savedSpeedY;
+const current=getSpeed();
+
+if(current>0){
+
+const ratio=
+ORIGINAL_SPEED/current;
+
+speedX*=ratio;
+speedY*=ratio;
+
+}
 
 playerSlowFactor=1;
 
@@ -2642,6 +2731,57 @@ slowOverlay.style.display="none";
 
 showSpeedFlash(
 "GREEN SLOW EXPIRED"
+);
+
+}
+
+}
+
+/* =========================
+   PURPLE TOUGHNESS DEBUFF
+========================= */
+
+function applyToughnessDebuff(){
+
+/*
+ If already debuffed, reset the timer
+ but keep the original toughness.
+ */
+
+if(!toughnessDebuffActive){
+
+normalToughness=toughness;
+
+}
+
+toughnessDebuffActive=true;
+
+toughness=.5;
+
+toughnessDebuffTimer=60*20;
+
+toughnessOverlay.style.display="block";
+
+}
+
+function updateToughnessDebuff(){
+
+if(!toughnessDebuffActive)return;
+
+toughnessDebuffTimer--;
+
+if(toughnessDebuffTimer<=0){
+
+toughness=normalToughness;
+
+toughnessDebuffActive=false;
+
+toughnessDebuffTimer=0;
+
+toughnessOverlay.style.display="none";
+
+showSpeedFlash(
+"PURPLE TOUGHNESS DEBUFF EXPIRED"
 );
 
 }
@@ -2913,6 +3053,10 @@ if(type==="toughnessChip"){
 
 toughness+=.4;
 
+if(!toughnessDebuffActive){
+normalToughness=toughness;
+}
+
 speedX*=.78;
 speedY*=.78;
 
@@ -2970,8 +3114,7 @@ enemy.y-(y+BALL_RADIUS)
 
 if(
 distance<320 &&
-!enemy.boss &&
-!enemy.bomb
+!enemy.boss
 ){
 
 killEnemy(i);
@@ -3041,6 +3184,10 @@ renderInventory();
 updateHUD();
 
 }
+
+/* =========================
+   POWERUP TIMERS
+========================= */
 
 function updatePowerups(){
 
@@ -3165,11 +3312,7 @@ for(let i=enemies.length-1;i>=0;i--){
 
 const enemy=enemies[i];
 
-/*
- Shield cannot destroy the bomb.
- */
-
-if(enemy.bomb)continue;
+if(enemy.armed)continue;
 
 const distance=
 Math.hypot(
@@ -3516,6 +3659,16 @@ speedDisplay.style.color="#ff4444";
 
 }
 
+if(toughnessDebuffActive){
+
+toughnessDisplay.style.color="#c000ff";
+
+}else{
+
+toughnessDisplay.style.color="";
+
+}
+
 }
 
 /* =========================
@@ -3570,23 +3723,18 @@ loot=[];
 
 malwarePopups.innerHTML="";
 
-document
-.querySelectorAll(".bombFire")
-.forEach(e=>e.remove());
-
 x=(innerWidth-BALL_SIZE)/2;
 y=(innerHeight-BALL_SIZE)/2;
 
 speedX=START_SPEED_X;
 speedY=START_SPEED_Y;
 
-savedSpeedX=START_SPEED_X;
-savedSpeedY=START_SPEED_Y;
-
 health=100;
-maxHealth=100;
-
 toughness=1;
+normalToughness=1;
+
+toughnessDebuffActive=false;
+toughnessDebuffTimer=0;
 
 wave=0;
 score=0;
@@ -3614,7 +3762,10 @@ bombActive=false;
 bombTimer=0;
 bombX=0;
 bombY=0;
-bombEnemy=null;
+activeBombEnemy=null;
+
+slowOverlay.style.display="none";
+toughnessOverlay.style.display="none";
 
 bombCountdown.style.display="none";
 bombWarning.style.display="none";
@@ -3629,8 +3780,6 @@ trashVisible=false;
 trashButton.style.display="none";
 inventory.style.display="none";
 eraser.style.display="none";
-
-slowOverlay.style.display="none";
 
 bossBar.style.display="none";
 bossName.style.display="none";
@@ -3924,6 +4073,7 @@ updateShield();
 checkShieldCollision();
 updatePowerups();
 updatePlayerSlow();
+updateToughnessDebuff();
 updateTimeBomb();
 
 updateBossBar();
